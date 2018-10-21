@@ -21,7 +21,7 @@ import { Route, Switch } from 'react-router-dom';
 
 import Listing from './Listing';
 import Details from './Details';
-import DocCreate from './Create';
+import DocCreate from './DocCreate';
 import { PageNotFound } from 'AppComponents/Base/Errors';
 
 const Documents = (props) => {
@@ -30,7 +30,7 @@ const Documents = (props) => {
         <Switch>
             <Route exact path='/apis/:apiUUID/documents' component={() => <Listing api={api}/>} />
             <Route path='/apis/:apiUUID/documents/:documentId/details' component={Details} />
-            <Route path='/apis/:apiUUID/documents/create' component={DocCreate} />
+            <Route path='/apis/:apiUUID/documents/create' component={() => <DocCreate api={api}/>} />
             <Route component={PageNotFound} />
         </Switch>
     );
