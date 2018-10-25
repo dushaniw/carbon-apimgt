@@ -43,12 +43,11 @@ const styles = theme => ({
     wrapper: {
         minHeight: '100%',
         marginBottom: -50,
-        background: 'transparent url(" + theme.custom.backgroundImage + ") repeat left top',
+        background: 'transparent url(' + theme.custom.backgroundImage + ') repeat left top',
     },
     contentWrapper: {
         display: 'flex',
         flexDirection: 'row',
-        overflow: 'auto',
         position: 'relative',
         minHeight: 'calc(100vh - 114px)',
     },
