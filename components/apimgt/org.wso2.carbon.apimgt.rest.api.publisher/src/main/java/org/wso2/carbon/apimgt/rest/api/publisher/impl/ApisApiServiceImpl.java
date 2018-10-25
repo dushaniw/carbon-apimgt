@@ -238,7 +238,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            String existingFingerprint = apisApiIdDocumentsDocumentIdContentGetFingerprint(apiId, documentId,
+            String existingFingerprint = apisApiIdDocumentsDocumentIdGetFingerprint(apiId, documentId,
                     ifNoneMatch, ifModifiedSince, request);
             if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
                     .contains(existingFingerprint)) {
@@ -255,13 +255,13 @@ public class ApisApiServiceImpl extends ApisApiService {
                         .header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"")
                         .build();
             } else if (DocumentInfo.SourceType.INLINE.equals(documentInfo.getSourceType())) {
-                String content = documentationContent.getInlineContent();
+                String content = documentInfo.getContent();
                 return Response.ok(content)
                         .header(RestApiConstants.HEADER_CONTENT_TYPE, MediaType.TEXT_PLAIN)
                         .header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"")
                         .build();
             } else if (DocumentInfo.SourceType.URL.equals(documentInfo.getSourceType())) {
-                String sourceUrl = documentInfo.getSourceURL();
+                String sourceUrl = documentInfo.getContent();
                 return Response.seeOther(new URI(sourceUrl))
                         .header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"")
                         .build();
@@ -283,40 +283,12 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     /**
-     * Retrives the fingerprint of a particular document content
-     *
-     * @param apiId           UUID of API
-     * @param documentId      UUID of the document
-     * @param ifNoneMatch     If-None-Match header value
-     * @param ifModifiedSince If-Modified-Since header value
-     * @param request         msf4j request object
-     * @return fingerprint of a particular document content
-     */
-    public String apisApiIdDocumentsDocumentIdContentGetFingerprint(String apiId, String documentId, String ifNoneMatch,
-                                                                    String ifModifiedSince, Request request) {
-        String username = RestApiUtil.getLoggedInUsername(request);
-        try {
-            String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username)
-                    .getLastUpdatedTimeOfDocumentContent(apiId, documentId);
-            return ETagUtils.generateETag(lastUpdatedTime);
-        } catch (APIManagementException e) {
-            //gives a warning and let it continue the execution
-            String errorMessage =
-                    "Error while retrieving last updated time of content of document " + documentId + " of API "
-                            + apiId;
-            log.error(errorMessage, e);
-            return null;
-        }
-    }
-
-    /**
      * Uploads a document's content and attach to particular document
      *
      * @param apiId             UUID of API
      * @param documentId        UUID of the document
      * @param fileInputStream   file content stream
      * @param fileDetail        meta infomation about the file
-     * @param inlineContent     inline documentation content
      * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param request           msf4j request object
@@ -324,26 +296,18 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response apisApiIdDocumentsDocumentIdContentPost(String apiId, String documentId,
-                                                            InputStream fileInputStream, FileInfo fileDetail, String
-                                                                    inlineContent, String ifMatch,
-                                                            String ifUnmodifiedSince, Request request) throws
-            NotFoundException {
+    public Response apisApiIdDocumentsDocumentIdContentPost(String apiId, String documentId, InputStream fileInputStream,
+                                                            FileInfo fileDetail, String ifMatch,
+                                                            String ifUnmodifiedSince, Request request)
+                                                            throws NotFoundException {
         try {
             String username = RestApiUtil.getLoggedInUsername(request);
             APIPublisher apiProvider = RestAPIPublisherUtil.getApiPublisher(username);
-            String existingFingerprint = apisApiIdDocumentsDocumentIdContentGetFingerprint(apiId, documentId,
-                    null, null, request);
+            String existingFingerprint = apisApiIdDocumentsDocumentIdGetFingerprint(apiId, documentId, null,
+                    null, request);
             if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
                     .contains(existingFingerprint)) {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
-            }
-
-            if (fileInputStream != null && inlineContent != null) {
-                String msg = "Only one of 'file' and 'inlineContent' should be specified";
-                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
-                log.error(msg);
-                return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
             }
 
             //retrieves the document and send 404 if not found
@@ -354,7 +318,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 log.error(msg);
                 return Response.status(Response.Status.NOT_FOUND).entity(errorDTO).build();
             }
-            //add content depending on the availability of either input stream or inline content
+            //add content depending on the availability of input stream
             if (fileInputStream != null) {
                 if (!documentation.getSourceType().equals(DocumentInfo.SourceType.FILE)) {
                     String msg = "Source type of document " + documentId + " is not FILE";
@@ -362,22 +326,14 @@ public class ApisApiServiceImpl extends ApisApiService {
                     log.error(msg);
                     return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
                 }
-                apiProvider.uploadDocumentationFile(documentId, fileInputStream, fileDetail.getContentType());
-            } else if (inlineContent != null) {
-                if (!documentation.getSourceType().equals(DocumentInfo.SourceType.INLINE)) {
-                    String msg = "Source type of document " + documentId + " is not INLINE";
-                    log.error(msg);
-                    ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900976L, msg);
-                    return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
-                }
-                apiProvider.addDocumentationContent(documentId, inlineContent);
+                apiProvider.uploadAPIDocumentationFile(documentId, fileInputStream);
             } else {
-                String msg = "Either 'file' or 'inlineContent' should be specified";
+                String msg = "The 'file' content should be specified";
                 log.error(msg);
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900976L, msg);
                 return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
             }
-            String newFingerprint = apisApiIdDocumentsDocumentIdContentGetFingerprint(apiId, documentId,
+            String newFingerprint = apisApiIdDocumentsDocumentIdGetFingerprint(apiId, documentId,
                     null, null, request);
             return Response.status(Response.Status.CREATED)
                     .header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"")
@@ -411,13 +367,13 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             String username = RestApiUtil.getLoggedInUsername(request);
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            String existingFingerprint = apisApiIdDocumentsDocumentIdGetFingerprint(apiId, documentId, null, null,
-                    request);
+            String existingFingerprint = apisApiIdDocumentsDocumentIdGetFingerprint(apiId, documentId, null,
+                    null, request);
             if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
                     .contains(existingFingerprint)) {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
             }
-            apiPublisher.removeDocumentation(documentId);
+            apiPublisher.removeAPIDocumentation(documentId);
             return Response.ok().build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting document" + documentId;
@@ -460,7 +416,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"")
                         .entity(MappingUtil.toDocumentDTO(documentInfo)).build();
             } else {
-                String msg = "Documntation not found " + documentId;
+                String msg = "Documentation not found " + documentId;
                 log.error(msg);
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
                 log.error(msg);
@@ -523,9 +479,8 @@ public class ApisApiServiceImpl extends ApisApiService {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-
-            String existingFingerprint = apisApiIdDocumentsDocumentIdGetFingerprint(apiId, documentId, null, null,
-                    request);
+            String existingFingerprint = apisApiIdDocumentsDocumentIdGetFingerprint(apiId, documentId, null,
+                    null, request);
             if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
                     .contains(existingFingerprint)) {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
@@ -549,9 +504,17 @@ public class ApisApiServiceImpl extends ApisApiService {
                 return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
             }
             if (body.getSourceType() == DocumentDTO.SourceTypeEnum.URL &&
-                    (StringUtils.isBlank(body.getSourceUrl()) || !RestApiUtil.isURL(body.getSourceUrl()))) {
-                //check otherTypeName for not null if doc type is OTHER
-                String msg = "Invalid document sourceUrl Format";
+                    (StringUtils.isBlank(body.getContent()) || !RestApiUtil.isURL(body.getSourceUrl()))) {
+                //check content is not null and in correct URL format if sourceType is URL
+                String msg = "Invalid document source URL Format";
+                log.error(msg);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900313L, msg);
+                log.error(msg);
+                return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+            }
+            if (body.getSourceType() == DocumentDTO.SourceTypeEnum.INLINE && StringUtils.isBlank(body.getContent())){
+                //check content is not null if sourceType is INLINE
+                String msg = "Document inline content cannot be empty";
                 log.error(msg);
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900313L, msg);
                 log.error(msg);
@@ -568,8 +531,8 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             //retrieve the updated documentation
             DocumentInfo newDocumentation = apiPublisher.getDocumentationSummary(documentId);
-            String newFingerprint = apisApiIdDocumentsDocumentIdGetFingerprint(apiId, documentId, null, null,
-                    request);
+            String newFingerprint = apisApiIdDocumentsDocumentIdGetFingerprint(apiId, documentId, null,
+                    null, request);
             return Response.ok().header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"")
                     .entity(MappingUtil.toDocumentDTO(newDocumentation)).build();
         } catch (APIManagementException e) {
@@ -636,23 +599,19 @@ public class ApisApiServiceImpl extends ApisApiService {
                 //check otherTypeName for not null if doc type is OTHER
                 RestApiUtil.handleBadRequest("otherTypeName cannot be empty if type is OTHER.", log);
             }
-            String sourceUrl = body.getSourceUrl();
+            String content = body.getContent();
             if (body.getSourceType() == DocumentDTO.SourceTypeEnum.URL &&
-                    (StringUtils.isBlank(sourceUrl) || !RestApiUtil.isURL(sourceUrl))) {
-                RestApiUtil.handleBadRequest("Invalid document sourceUrl Format", log);
+                    (StringUtils.isBlank(content) || !RestApiUtil.isURL(content))) {
+                RestApiUtil.handleBadRequest("Invalid document source Url Format", log);
+            }
+            if (body.getSourceType() == DocumentDTO.SourceTypeEnum.INLINE && StringUtils.isBlank(content)){
+                //check content is not null if sourceType is INLINE
+                  RestApiUtil.handleBadRequest("Document inline content cannot be empty", log);
             }
             //this will fail if user does not have access to the API or the API does not exist
             String docid = apiProvider.addDocumentationInfo(apiId, documentation);
             documentation = apiProvider.getDocumentationSummary(docid);
             DocumentDTO newDocumentDTO = MappingUtil.toDocumentDTO(documentation);
-            //Add initial inline content as empty String, if the Document type is INLINE
-            if (body.getSourceType() == DocumentDTO.SourceTypeEnum.INLINE) {
-                apiProvider.addDocumentationContent(docid, "");
-                if (log.isDebugEnabled()) {
-                    log.debug("The updated source type of the document " + body.getName() + " is: " + body
-                            .getSourceType());
-                }
-            }
             return Response.status(Response.Status.CREATED).entity(newDocumentDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while create  document for api " + apiId;

@@ -26,7 +26,6 @@ import java.io.InputStream;
  */
 public final class DocumentContent {
     private final DocumentInfo documentInfo;
-    private final String inlineContent;
     private final InputStream fileContent;
 
     @Override
@@ -52,7 +51,6 @@ public final class DocumentContent {
 
     private DocumentContent(Builder builder) {
         this.documentInfo = builder.documentInfo;
-        this.inlineContent = builder.inlineContent;
         this.fileContent = builder.filecontent;
     }
 
@@ -65,7 +63,6 @@ public final class DocumentContent {
      */
     public static final class Builder {
         private DocumentInfo documentInfo;
-        private String inlineContent;
         private InputStream filecontent;
 
         public Builder() {
@@ -80,11 +77,6 @@ public final class DocumentContent {
             return this;
         }
 
-        public Builder inlineContent(String inlineContent) {
-            this.inlineContent = inlineContent;
-            return this;
-        }
-
         public Builder fileContent(InputStream fileContent) {
             this.filecontent = fileContent;
             return this;
@@ -93,10 +85,6 @@ public final class DocumentContent {
 
     public DocumentInfo getDocumentInfo() {
         return documentInfo;
-    }
-
-    public String getInlineContent() {
-        return inlineContent;
     }
 
     public InputStream getFileContent() {

@@ -350,7 +350,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                         .header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"")
                         .build();
             } else if (DocumentInfo.SourceType.URL.equals(documentInfo.getSourceType())) {
-                String sourceUrl = documentInfo.getSourceURL();
+                String sourceUrl = documentInfo.getContent();
                 return Response.seeOther(new URI(sourceUrl))
                         .header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"")
                         .build();

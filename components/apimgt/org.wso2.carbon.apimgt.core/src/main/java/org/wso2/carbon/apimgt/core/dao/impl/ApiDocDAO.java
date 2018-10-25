@@ -20,10 +20,14 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
+import org.apache.commons.io.IOUtils;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -36,16 +40,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Provides data access to Doc Meta data related tables
+ * Provides data access to API Docs data related tables
  */
-class DocMetaDataDAO {
-    private static final String AM_API_DOC_META_DATA_TABLE_NAME = "AM_API_DOC_META_DATA";
+class ApiDocDAO {
+    private static final String AM_API_DOCS = "AM_API_DOCS";
 
     static List<DocumentInfo> getDocumentInfoList(Connection connection, String apiID) throws SQLException {
-        final String query = "SELECT meta.UUID, meta.NAME, meta.SUMMARY, meta.TYPE, meta.OTHER_TYPE_NAME, " +
-                "meta.SOURCE_URL, meta.FILE_NAME, meta.SOURCE_TYPE, meta.VISIBILITY " +
-                "FROM AM_API_DOC_META_DATA meta, AM_API_RESOURCES rec WHERE " +
-                "meta.UUID = rec.UUID AND rec.API_ID = ?";
+        final String query = "SELECT UUID, NAME, SUMMARY, TYPE, OTHER_TYPE_NAME, FILE_NAME, SOURCE_TYPE, " +
+                "VISIBILITY, CONTENT FROM AM_API_DOCS WHERE API_ID = ?";
 
         List<DocumentInfo> metaDataList = new ArrayList<>();
 
@@ -61,7 +63,7 @@ class DocMetaDataDAO {
                             summary(rs.getString("SUMMARY")).
                             type(DocumentInfo.DocType.valueOf(rs.getString("TYPE"))).
                             otherType(rs.getString("OTHER_TYPE_NAME")).
-                            sourceURL(rs.getString("SOURCE_URL")).
+                            content(rs.getString("CONTENT")).
                             fileName(rs.getString("FILE_NAME")).
                             sourceType(DocumentInfo.SourceType.valueOf(rs.getString("SOURCE_TYPE"))).
                             visibility(DocumentInfo.Visibility.valueOf(rs.getString("VISIBILITY"))).build());
@@ -73,7 +75,7 @@ class DocMetaDataDAO {
     }
 
     /**
-     * Update doc info
+     * Update doc info of documents
      *
      * @param connection   DB connection
      * @param documentInfo document info
@@ -83,8 +85,8 @@ class DocMetaDataDAO {
     static void updateDocInfo(Connection connection, DocumentInfo documentInfo, String updatedBy) throws SQLException {
         deleteDOCPermission(connection, documentInfo.getId());
         addDOCPermission(connection, documentInfo.getPermissionMap(), documentInfo.getId());
-        final String query = "UPDATE AM_API_DOC_META_DATA SET NAME = ?, SUMMARY = ?, TYPE = ?, "
-                + "OTHER_TYPE_NAME = ?, SOURCE_URL = ?, FILE_NAME = ?, SOURCE_TYPE = ?, VISIBILITY = ?, "
+        final String query = "UPDATE AM_API_DOCS SET NAME = ?, SUMMARY = ?, TYPE = ?, "
+                + "OTHER_TYPE_NAME = ?, CONTENT = ?, FILE_NAME = ?, SOURCE_TYPE = ?, VISIBILITY = ?, "
                 + "UPDATED_BY = ?, LAST_UPDATED_TIME = ? WHERE UUID = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -92,7 +94,7 @@ class DocMetaDataDAO {
             statement.setString(2, documentInfo.getSummary());
             statement.setString(3, documentInfo.getType().toString());
             statement.setString(4, documentInfo.getOtherType());
-            statement.setString(5, documentInfo.getSourceURL());
+            statement.setString(5, documentInfo.getContent());
             statement.setString(6, documentInfo.getFileName());
             statement.setString(7, documentInfo.getSourceType().toString());
             statement.setString(8, documentInfo.getVisibility().toString());
@@ -103,11 +105,18 @@ class DocMetaDataDAO {
         }
     }
 
+    /**
+     * Get doc info of documents with source type URL or inline
+     *
+     * @param connection   DB connection
+     * @param docID document ID
+     * @throws SQLException
+     */
     static DocumentInfo getDocumentInfo(Connection connection, String docID) throws SQLException {
-        final String query = "SELECT AM_API_DOC_META_DATA.UUID, AM_API_DOC_META_DATA.NAME, AM_API_DOC_META_DATA" +
-                ".SUMMARY, AM_API_DOC_META_DATA.TYPE, AM_API_DOC_META_DATA.OTHER_TYPE_NAME, AM_API_DOC_META_DATA" +
-                ".SOURCE_URL, AM_API_DOC_META_DATA.FILE_NAME, AM_API_DOC_META_DATA.SOURCE_TYPE, AM_API_DOC_META_DATA" +
-                ".VISIBILITY FROM AM_API_DOC_META_DATA WHERE AM_API_DOC_META_DATA.UUID = ?";
+        final String query = "SELECT AM_API_DOCS.UUID, AM_API_DOCS.NAME, AM_API_DOCS" +
+                ".SUMMARY, AM_API_DOCS.TYPE, AM_API_DOCS.OTHER_TYPE_NAME, AM_API_DOCS" +
+                ".CONTENT, AM_API_DOCS.FILE_NAME, AM_API_DOCS.SOURCE_TYPE, AM_API_DOCS" +
+                ".VISIBILITY FROM AM_API_DOCS WHERE AM_API_DOCS.UUID = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, docID);
@@ -121,7 +130,7 @@ class DocMetaDataDAO {
                             summary(rs.getString("SUMMARY")).
                             type(DocumentInfo.DocType.valueOf(rs.getString("TYPE"))).
                             otherType(rs.getString("OTHER_TYPE_NAME")).
-                            sourceURL(rs.getString("SOURCE_URL")).
+                            content(rs.getString("CONTENT")).
                             sourceType(DocumentInfo.SourceType.valueOf(rs.getString("SOURCE_TYPE"))).
                             visibility(DocumentInfo.Visibility.valueOf(rs.getString("VISIBILITY"))).
                             fileName(rs.getString("FILE_NAME")).build();
@@ -132,53 +141,33 @@ class DocMetaDataDAO {
         return null;
     }
 
-    static DocumentInfo checkDocument(Connection connection, String docID) throws SQLException {
-        final String query = "SELECT UUID, NAME, SUMMARY, TYPE, OTHER_TYPE_NAME, SOURCE_URL, FILE_NAME, SOURCE_TYPE, " +
-                "VISIBILITY FROM AM_API_DOC_META_DATA WHERE UUID = ?";
-
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, docID);
-            statement.execute();
-
-            try (ResultSet rs =  statement.getResultSet()) {
-                while (rs.next()) {
-                    return new DocumentInfo.Builder().
-                            id(rs.getString("UUID")).
-                            name(rs.getString("NAME")).
-                            summary(rs.getString("SUMMARY")).
-                            type(DocumentInfo.DocType.valueOf(rs.getString("TYPE"))).
-                            otherType(rs.getString("OTHER_TYPE_NAME")).
-                            sourceURL(rs.getString("SOURCE_URL")).
-                            fileName(rs.getString("FILE_NAME")).
-                            sourceType(DocumentInfo.SourceType.valueOf(rs.getString("SOURCE_TYPE"))).
-                            visibility(DocumentInfo.Visibility.valueOf(rs.getString("VISIBILITY"))).build();
-                }
-            }
-        }
-
-        return null;
-    }
-
-
-    static void addDocumentInfo(Connection connection, DocumentInfo documentInfo) throws SQLException {
-        final String query = "INSERT INTO AM_API_DOC_META_DATA (UUID, NAME, SUMMARY, TYPE, OTHER_TYPE_NAME, " +
-                "SOURCE_URL, FILE_NAME, SOURCE_TYPE, VISIBILITY, CREATED_BY, CREATED_TIME, UPDATED_BY, " + 
-                "LAST_UPDATED_TIME) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    /**
+     * add doc info of documents with source type URL or inline
+     *
+     * @param connection   DB connection
+     * @param documentInfo document Info
+     * @throws SQLException
+     */
+    static void addDocumentInfo(Connection connection, DocumentInfo documentInfo, String apiID) throws SQLException {
+        final String query = "INSERT INTO AM_API_DOCS (UUID, API_ID, NAME, SUMMARY, TYPE, OTHER_TYPE_NAME, " +
+                "CONTENT, FILE_NAME, SOURCE_TYPE, VISIBILITY, CREATED_BY, CREATED_TIME, UPDATED_BY, " +
+                "LAST_UPDATED_TIME) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, documentInfo.getId());
-            statement.setString(2, documentInfo.getName());
-            statement.setString(3, documentInfo.getSummary());
-            statement.setString(4, documentInfo.getType().toString());
-            statement.setString(5, documentInfo.getOtherType());
-            statement.setString(6, documentInfo.getSourceURL());
-            statement.setString(7, documentInfo.getFileName());
-            statement.setString(8, documentInfo.getSourceType().toString());
-            statement.setString(9, documentInfo.getVisibility().toString());
-            statement.setString(10, documentInfo.getCreatedBy());
-            statement.setTimestamp(11, Timestamp.from(documentInfo.getCreatedTime()));
-            statement.setString(12, documentInfo.getUpdatedBy());
-            statement.setTimestamp(13, Timestamp.from(documentInfo.getLastUpdatedTime()));
+            statement.setString(2, apiID);
+            statement.setString(3, documentInfo.getName());
+            statement.setString(4, documentInfo.getSummary());
+            statement.setString(5, documentInfo.getType().toString());
+            statement.setString(6, documentInfo.getOtherType());
+            statement.setString(7, documentInfo.getContent());
+            statement.setString(8, documentInfo.getFileName());
+            statement.setString(9, documentInfo.getSourceType().toString());
+            statement.setString(10, documentInfo.getVisibility().toString());
+            statement.setString(11, documentInfo.getCreatedBy());
+            statement.setTimestamp(12, Timestamp.from(documentInfo.getCreatedTime()));
+            statement.setString(13, documentInfo.getUpdatedBy());
+            statement.setTimestamp(14, Timestamp.from(documentInfo.getLastUpdatedTime()));
             statement.execute();
             addDOCPermission(connection, documentInfo.getPermissionMap(), documentInfo.getId());
         }
@@ -186,7 +175,7 @@ class DocMetaDataDAO {
     }
 
     static String getLastUpdatedTimeOfDocument(String documentId) throws APIMgtDAOException {
-        return EntityDAO.getLastUpdatedTimeOfResourceByUUID(AM_API_DOC_META_DATA_TABLE_NAME, documentId);
+        return EntityDAO.getLastUpdatedTimeOfResourceByUUID(AM_API_DOCS, documentId);
     }
 
     private static void deleteDOCPermission(Connection connection, String docID) throws SQLException {
@@ -236,4 +225,63 @@ class DocMetaDataDAO {
 
     }
 
+    /**
+     * Update the binary content of a given API documentation
+     * @param connection connection
+     * @param docID document Id
+     * @param resourceValue document input stream
+     * @throws SQLException
+     */
+    static int updateBinaryDocContent(Connection connection, String docID, InputStream resourceValue,
+                                      String updatedBy) throws SQLException {
+        final String query = "UPDATE AM_API_DOCS SET CONTENT_BINARY_VALUE = ?, UPDATED_BY = ?, "
+                + "LAST_UPDATED_TIME = ? WHERE UUID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setBinaryStream(1, resourceValue);
+            statement.setString(2, updatedBy);
+            statement.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+            statement.setString(4, docID);
+            return statement.executeUpdate();
+        }
+    }
+
+    /**
+     * Get the binary content of a given API documentation
+     * @param connection connection
+     * @param docID document Id
+     * @throws SQLException
+     */
+    static InputStream getBinaryDocContent(Connection connection, String docID) throws SQLException, IOException {
+        final String query = "SELECT CONTENT_BINARY_VALUE FROM AM_API_RESOURCES WHERE UUID = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, docID);
+            statement.execute();
+
+            try (ResultSet rs = statement.getResultSet()) {
+                if (rs.next()) {
+                    InputStream inputStream = rs.getBinaryStream("CONTENT_BINARY_VALUE");
+                    if (inputStream != null) {
+                        return new ByteArrayInputStream(IOUtils.toByteArray(inputStream));
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Delete given API documentation
+     * @param connection connection
+     * @param docID document Id
+     * @throws SQLException
+     */
+    static void deleteDocument(Connection connection, String docID)
+            throws SQLException {
+        final String query = "DELETE FROM DOCS WHERE UUID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, docID);
+            statement.execute();
+        }
+    }
 }

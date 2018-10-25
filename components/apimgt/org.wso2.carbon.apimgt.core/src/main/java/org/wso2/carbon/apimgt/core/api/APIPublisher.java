@@ -170,9 +170,26 @@ public interface APIPublisher extends APIManager {
     String addDocumentationInfo(String apiId, DocumentInfo documentInfo) throws APIManagementException;
 
     /**
+     * Add a API document (of source type FILE) with a file
+     *
+     * @param resourceId UUID of document
+     * @param content    content of the file as an Input Stream
+     * @throws APIManagementException if failed to add the file
+     */
+    void uploadAPIDocumentationFile(String resourceId, InputStream content) throws APIManagementException;
+
+    /**
+     * Removes a given API documentation
+     *
+     * @param docId Document Id
+     * @throws APIManagementException if failed to remove documentation
+     */
+    void removeAPIDocumentation(String docId) throws APIManagementException;
+
+    /**
      * Add a document (of source type FILE) with a file
      *
-     * @param resourceId UUID of API
+     * @param resourceId UUID of resource
      * @param content    content of the file as an Input Stream
      * @param dataType   File mime type
      * @throws APIManagementException if failed to add the file
@@ -204,15 +221,6 @@ public interface APIPublisher extends APIManager {
      * @throws APIManagementException If failed to check ia API exist.
      */
     boolean checkIfAPIContextExists(String context) throws APIManagementException;
-
-    /**
-     * This method used to save the documentation content
-     *
-     * @param docId name of the inline documentation
-     * @param text  content of the inline documentation
-     * @throws APIManagementException if failed to add the document as a resource to registry
-     */
-    void addDocumentationContent(String docId, String text) throws APIManagementException;
 
     /**
      * Updates a given documentation

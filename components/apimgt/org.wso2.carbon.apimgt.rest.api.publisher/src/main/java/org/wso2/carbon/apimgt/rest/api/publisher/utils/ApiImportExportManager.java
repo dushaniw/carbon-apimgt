@@ -268,9 +268,6 @@ public class ApiImportExportManager {
                     apiPublisher.uploadDocumentationFile(aDocContent.getDocumentInfo().getId(),
                             aDocContent.getFileContent(), 
                             URLConnection.guessContentTypeFromStream(aDocContent.getFileContent()));
-                } else if (aDocContent.getDocumentInfo().getSourceType().equals(DocumentInfo.SourceType.INLINE)) {
-                    apiPublisher.addDocumentationContent(aDocContent.getDocumentInfo().getId(),
-                            aDocContent.getInlineContent());
                 }
             }
 
@@ -339,9 +336,6 @@ public class ApiImportExportManager {
                     apiPublisher
                             .uploadDocumentationFile(docContent.getDocumentInfo().getId(), docContent.getFileContent(),
                                     URLConnection.guessContentTypeFromStream(docContent.getFileContent()));
-                } else if (docContent.getDocumentInfo().getSourceType().equals(DocumentInfo.SourceType.INLINE)) {
-                    apiPublisher.addDocumentationContent(docContent.getDocumentInfo().getId(),
-                            docContent.getInlineContent());
                 }
             }
 

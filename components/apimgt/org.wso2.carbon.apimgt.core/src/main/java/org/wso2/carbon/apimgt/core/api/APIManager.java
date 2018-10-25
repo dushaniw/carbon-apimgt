@@ -216,16 +216,6 @@ public interface APIManager {
     String getLastUpdatedTimeOfDocument(String documentId) throws APIManagementException;
 
     /**
-     * Retrieves the last updated time of the content of a document of an API
-     * 
-     * @param apiId UUID of API
-     * @param documentId UUID of document
-     * @return  Last updated time of document's content
-     * @throws APIManagementException if API Manager core level exception occurred
-     */
-    String getLastUpdatedTimeOfDocumentContent(String apiId, String documentId) throws APIManagementException;
-
-    /**
      * Retrieves the last updated time of the thumbnail image of an API
      *
      * @param apiId UUID of API

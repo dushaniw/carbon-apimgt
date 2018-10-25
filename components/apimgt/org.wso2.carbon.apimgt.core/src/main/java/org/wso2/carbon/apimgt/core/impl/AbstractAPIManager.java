@@ -313,14 +313,6 @@ public abstract class AbstractAPIManager implements APIManager {
                         throw new APIManagementException("Couldn't find file content of  document", ExceptionCodes
                                 .DOCUMENT_CONTENT_NOT_FOUND);
                     }
-                } else if (documentInfo.getSourceType().equals(DocumentInfo.SourceType.INLINE)) {
-                    String inlineContent = getApiDAO().getDocumentInlineContent(docId);
-                    if (inlineContent != null) {
-                        documentContentBuilder = documentContentBuilder.inlineContent(inlineContent);
-                    } else {
-                        throw new APIManagementException("Couldn't find inline content of  document", ExceptionCodes
-                                .DOCUMENT_CONTENT_NOT_FOUND);
-                    }
                 }
             } else {
                 throw new APIManagementException("Couldn't fnd document", ExceptionCodes.DOCUMENT_NOT_FOUND);
@@ -430,23 +422,6 @@ public abstract class AbstractAPIManager implements APIManager {
             lastUpdatedTime = getApiDAO().getLastUpdatedTimeOfDocument(documentId);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while retrieving the last updated time of document " + documentId;
-            log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
-        }
-        return lastUpdatedTime;
-    }
-
-    /**
-     * @see APIManager#getLastUpdatedTimeOfDocumentContent(String, String)
-     */
-    @Override
-    public String getLastUpdatedTimeOfDocumentContent(String apiId, String documentId) throws APIManagementException {
-        String lastUpdatedTime;
-        try {
-            lastUpdatedTime = getApiDAO().getLastUpdatedTimeOfDocumentContent(apiId, documentId);
-        } catch (APIMgtDAOException e) {
-            String errorMsg =
-                    "Error occurred while retrieving the last updated time of the document's content " + documentId;
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         }

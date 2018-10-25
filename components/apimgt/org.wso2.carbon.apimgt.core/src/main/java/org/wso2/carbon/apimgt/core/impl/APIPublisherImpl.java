@@ -1208,9 +1208,43 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     /**
+     * Add a API document (of source type FILE) with a file
+     *
+     * @param resourceId UUID of document
+     * @param content    content of the file as an Input Stream
+     * @throws APIManagementException if failed to add the file
+     */
+    @Override
+    public void uploadAPIDocumentationFile(String resourceId, InputStream content) throws APIManagementException {
+        try {
+            getApiDAO().addAPIDocumentFileContent(resourceId, content, getUsername());
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Unable to add API documentation with file";
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
+        }
+    }
+
+    /**
+     * Removes a given API documentation
+     *
+     * @param docId Document Id
+     * @throws APIManagementException if failed to remove documentation
+     */
+    public void removeAPIDocumentation(String docId) throws APIManagementException {
+        try {
+            getApiDAO().deleteAPIDocument(docId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Unable to remove API documentation with file";
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
+        }
+    }
+
+    /**
      * Add a document (of source type FILE) with a file
      *
-     * @param resourceId UUID of API
+     * @param resourceId UUID of of resource
      * @param content    content of the file as an Input Stream
      * @param dataType   File mime type
      * @throws APIManagementException if failed to add the file
@@ -1238,7 +1272,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         try {
             getApiDAO().deleteDocument(docId);
         } catch (APIMgtDAOException e) {
-            String errorMsg = "Unable to add documentation with file";
+            String errorMsg = "Unable to remove documentation with file";
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         }
@@ -1266,18 +1300,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public boolean checkIfAPINameExists(String name) throws APIManagementException {
         return isApiNameExist(name);
-    }
-
-    /**
-     * This method used to save the documentation content
-     *
-     * @param docId UUID of the Doc
-     * @param text  Plain text content of the doc.
-     * @throws APIManagementException if failed to add the document as a resource to registry
-     */
-    @Override
-    public void addDocumentationContent(String docId, String text) throws APIManagementException {
-        getApiDAO().addDocumentInlineContent(docId, text, getUsername());
     }
 
     /**

@@ -55,40 +55,6 @@ class ApiResourceDAO {
         return false;
     }
 
-    static void addResourceWithoutValue(Connection connection, String apiID, String resourceID,
-                                        ResourceCategory category) throws SQLException {
-        final String query = "INSERT INTO AM_API_RESOURCES (UUID, API_ID, RESOURCE_CATEGORY_ID) VALUES (?,?,?)";
-
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, resourceID);
-            statement.setString(2, apiID);
-            statement.setInt(3, ResourceCategoryDAO.getResourceCategoryID(connection, category));
-
-            statement.execute();
-        }
-    }
-
-    static void addTextResource(Connection connection, String apiID, String resourceID,
-            ResourceCategory category, String dataType, String textValue, String createdBy)
-            throws SQLException {
-        final String query = "INSERT INTO AM_API_RESOURCES (UUID, API_ID, RESOURCE_CATEGORY_ID, " +
-                "DATA_TYPE, RESOURCE_TEXT_VALUE, CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME) " 
-                + "VALUES (?,?,?,?,?,?,?,?,?)";
-
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, resourceID);
-            statement.setString(2, apiID);
-            statement.setInt(3, ResourceCategoryDAO.getResourceCategoryID(connection, category));
-            statement.setString(4, dataType);
-            statement.setString(5, textValue);
-            statement.setString(6, createdBy);
-            statement.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
-            statement.setString(8, createdBy);
-            statement.setTimestamp(9, Timestamp.valueOf(LocalDateTime.now()));
-            statement.execute();
-        }
-    }
-
     static void addBinaryResource(Connection connection, String apiID, String resourceID, ResourceCategory category,
             String dataType, InputStream binaryValue, String createdBy) throws SQLException {
         final String query = "INSERT INTO AM_API_RESOURCES (UUID, API_ID, RESOURCE_CATEGORY_ID, " +
@@ -105,42 +71,6 @@ class ApiResourceDAO {
             statement.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
             statement.setString(8, createdBy);
             statement.setTimestamp(9, Timestamp.valueOf(LocalDateTime.now()));
-            statement.execute();
-        }
-    }
-
-
-    static String getTextValueForCategory(Connection connection, String apiID,
-                                          ResourceCategory resourceCategory) throws SQLException {
-        final String query = "SELECT RESOURCE_TEXT_VALUE FROM AM_API_RESOURCES WHERE API_ID = ? AND " +
-                "RESOURCE_CATEGORY_ID = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, apiID);
-            statement.setInt(2, ResourceCategoryDAO.getResourceCategoryID(connection, resourceCategory));
-            statement.execute();
-
-            try (ResultSet rs =  statement.getResultSet()) {
-                if (rs.next()) {
-                    return rs.getString("RESOURCE_TEXT_VALUE");
-                }
-            }
-        }
-
-        return null;
-    }
-
-    static void updateTextValueForCategory(Connection connection, String apiID,
-                                           ResourceCategory category,
-                                           String resourceValue, String updatedBy) throws SQLException {
-        final String query = "UPDATE AM_API_RESOURCES SET RESOURCE_TEXT_VALUE = ?, UPDATED_BY = ?, " 
-                + "LAST_UPDATED_TIME = ? WHERE API_ID = ? AND RESOURCE_CATEGORY_ID = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, resourceValue);
-            statement.setString(2, updatedBy);
-            statement.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
-            statement.setString(4, apiID);
-            statement.setInt(5, ResourceCategoryDAO.getResourceCategoryID(connection, category));
-
             statement.execute();
         }
     }
@@ -187,23 +117,6 @@ class ApiResourceDAO {
                 }
             }
         }
-        return null;
-    }
-
-    static String getTextResource(Connection connection, String resourceID) throws SQLException {
-        final String query = "SELECT RESOURCE_TEXT_VALUE FROM AM_API_RESOURCES WHERE UUID = ?";
-
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, resourceID);
-            statement.execute();
-
-            try (ResultSet rs =  statement.getResultSet()) {
-                if (rs.next()) {
-                    return rs.getString("RESOURCE_TEXT_VALUE");
-                }
-            }
-        }
-
         return null;
     }
 
@@ -275,27 +188,12 @@ class ApiResourceDAO {
         }
     }
 
-    static int updateTextResource(Connection connection, String resourceID, String resourceValue, String updatedBy)
-            throws SQLException {
-        final String query = "UPDATE AM_API_RESOURCES SET RESOURCE_TEXT_VALUE = ?, UPDATED_BY = ?, " 
-                + "LAST_UPDATED_TIME = ? WHERE UUID = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, resourceValue);
-            statement.setString(2, updatedBy);
-            statement.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
-            statement.setString(4, resourceID);
-
-            return statement.executeUpdate();
-        }
-    }
-
     static void deleteUniqueResourceForCategory(Connection connection, String apiID, ResourceCategory resourceCategory)
             throws SQLException {
         final String query = "DELETE FROM AM_API_RESOURCES WHERE API_ID = ? AND RESOURCE_CATEGORY_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, apiID);
             statement.setInt(2, ResourceCategoryDAO.getResourceCategoryID(connection, resourceCategory));
-
             statement.execute();
         }
     }
@@ -305,7 +203,6 @@ class ApiResourceDAO {
         final String query = "DELETE FROM AM_API_RESOURCES WHERE UUID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, resourceID);
-
             statement.execute();
         }
     }

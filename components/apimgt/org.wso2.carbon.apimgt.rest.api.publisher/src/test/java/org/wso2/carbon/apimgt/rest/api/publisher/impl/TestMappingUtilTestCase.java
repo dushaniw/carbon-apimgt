@@ -250,7 +250,7 @@ public class TestMappingUtilTestCase {
         assertEquals(documentInfo.getId(), documentDTO.getDocumentId());
         assertEquals(documentInfo.getOtherType(), documentDTO.getOtherTypeName());
         assertEquals(documentInfo.getSourceType().getType(), documentDTO.getSourceType().name());
-        assertEquals(documentInfo.getSourceURL(), documentDTO.getSourceUrl());
+        assertEquals(documentInfo.getContent(), documentDTO.getSourceUrl());
         assertEquals(documentInfo.getFileName(), documentDTO.getFileName());
         assertEquals(documentInfo.getSummary(), documentDTO.getSummary());
         assertEquals(documentInfo.getVisibility().toString(), documentDTO.getVisibility().name());
@@ -262,7 +262,7 @@ public class TestMappingUtilTestCase {
         assertEquals(mappedDocumentInfo.getId(), documentDTO.getDocumentId());
         assertEquals(mappedDocumentInfo.getOtherType(), documentDTO.getOtherTypeName());
         assertEquals(mappedDocumentInfo.getSourceType().getType(), documentDTO.getSourceType().name());
-        assertEquals(mappedDocumentInfo.getSourceURL(), documentDTO.getSourceUrl());
+        assertEquals(mappedDocumentInfo.getContent(), documentDTO.getSourceUrl());
         assertEquals(mappedDocumentInfo.getFileName(), documentDTO.getFileName());
         assertEquals(mappedDocumentInfo.getSummary(), documentDTO.getSummary());
         assertEquals(mappedDocumentInfo.getVisibility().toString(), documentDTO.getVisibility().name());
@@ -286,7 +286,7 @@ public class TestMappingUtilTestCase {
         assertEquals(documentInfo1.getId(), documentListDTO.getList().get(0).getDocumentId());
         assertEquals(documentInfo1.getOtherType(), documentListDTO.getList().get(0).getOtherTypeName());
         assertEquals(documentInfo1.getSourceType().getType(), documentListDTO.getList().get(0).getSourceType().name());
-        assertEquals(documentInfo1.getSourceURL(), documentListDTO.getList().get(0).getSourceUrl());
+        assertEquals(documentInfo1.getContent(), documentListDTO.getList().get(0).getSourceUrl());
         assertEquals(documentInfo1.getFileName(), documentListDTO.getList().get(0).getFileName());
         assertEquals(documentInfo1.getSummary(), documentListDTO.getList().get(0).getSummary());
         assertEquals(documentInfo1.getVisibility().toString(), documentListDTO.getList().get(0).getVisibility().name());
@@ -296,7 +296,7 @@ public class TestMappingUtilTestCase {
         assertEquals(documentInfo2.getId(), documentListDTO.getList().get(1).getDocumentId());
         assertEquals(documentInfo2.getOtherType(), documentListDTO.getList().get(1).getOtherTypeName());
         assertEquals(documentInfo2.getSourceType().getType(), documentListDTO.getList().get(1).getSourceType().name());
-        assertEquals(documentInfo2.getSourceURL(), documentListDTO.getList().get(1).getSourceUrl());
+        assertEquals(documentInfo2.getContent(), documentListDTO.getList().get(1).getSourceUrl());
         assertEquals(documentInfo2.getFileName(), documentListDTO.getList().get(1).getFileName());
         assertEquals(documentInfo2.getSummary(), documentListDTO.getList().get(1).getSummary());
         assertEquals(documentInfo2.getVisibility().toString(), documentListDTO.getList().get(1).getVisibility().name());

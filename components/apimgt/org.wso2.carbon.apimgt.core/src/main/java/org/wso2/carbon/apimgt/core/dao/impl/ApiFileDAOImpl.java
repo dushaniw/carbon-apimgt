@@ -210,26 +210,18 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#getDocumentInfo(String resourceID)
+     * @see ApiDAO#getDocumentInfo(String docID)
      */
     @Override
-    public DocumentInfo getDocumentInfo(String resourceID) throws APIMgtDAOException {
+    public DocumentInfo getDocumentInfo(String docID) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * @see ApiDAO#getDocumentFileContent(String resourceID)
+     * @see ApiDAO#getDocumentFileContent(String docID)
      */
     @Override
-    public InputStream getDocumentFileContent(String resourceID) throws APIMgtDAOException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @see ApiDAO#getDocumentInlineContent(String resourceID)
-     */
-    @Override
-    public String getDocumentInlineContent(String resourceID) throws APIMgtDAOException {
+    public InputStream getDocumentFileContent(String docID) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
@@ -261,11 +253,11 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#addDocumentInlineContent(String resourceID, String content, String updatedBy)
+     * @see ApiDAO#addAPIDocumentFileContent(String docID, InputStream content, String updatedBy
      */
     @Override
-    public void addDocumentInlineContent(String resourceID, String content, String updatedBy)
-            throws APIMgtDAOException {
+    public void addAPIDocumentFileContent(String docID, InputStream content, String updatedBy) throws
+            APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
@@ -274,6 +266,14 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public void deleteDocument(String resourceID) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @see ApiDAO#deleteAPIDocument(String docId)
+     */
+    @Override
+    public void deleteAPIDocument(String docId) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
@@ -436,15 +436,6 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public String getLastUpdatedTimeOfDocument(String documentId) throws APIMgtDAOException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @see ApiDAO#getLastUpdatedTimeOfDocumentContent(String apiId, String documentId)
-     */
-    @Override
-    public String getLastUpdatedTimeOfDocumentContent(String apiId, String documentId)
-            throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 

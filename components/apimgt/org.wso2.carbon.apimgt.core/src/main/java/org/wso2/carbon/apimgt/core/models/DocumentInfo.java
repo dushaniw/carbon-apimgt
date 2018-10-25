@@ -31,7 +31,7 @@ public final class DocumentInfo {
 
     private DocumentInfo(Builder builder) {
         sourceType = builder.sourceType;
-        sourceURL = builder.sourceURL;
+        content = builder.content;
         otherType = builder.otherType;
         id = builder.id;
         summary = builder.summary;
@@ -71,8 +71,8 @@ public final class DocumentInfo {
         return sourceType;
     }
 
-    public String getSourceURL() {
-        return sourceURL;
+    public String getContent() {
+        return content;
     }
 
     public String getOtherType() {
@@ -198,7 +198,7 @@ public final class DocumentInfo {
     }
 
     private final SourceType sourceType;
-    private final String sourceURL;
+    private final String content;
     private final String otherType;
     private final String id;
     private final String summary;
@@ -219,7 +219,7 @@ public final class DocumentInfo {
     public static final class Builder {
         private HashMap permissionMap;
         private SourceType sourceType;
-        private String sourceURL;
+        private String content;
         private String otherType;
         private String id;
         private String summary;
@@ -238,7 +238,7 @@ public final class DocumentInfo {
         }
 
         public String getSourceURL() {
-            return sourceURL;
+            return content;
         }
 
         public String getOtherType() {
@@ -274,7 +274,7 @@ public final class DocumentInfo {
 
         public Builder(DocumentInfo copy) {
             this.sourceType = copy.sourceType;
-            this.sourceURL = copy.sourceURL;
+            this.content = copy.content;
             this.otherType = copy.otherType;
             this.id = copy.id;
             this.summary = copy.summary;
@@ -299,14 +299,14 @@ public final class DocumentInfo {
         }
 
         /**
-         * Sets the {@code sourceURL} and returns a reference to this Builder
+         * Sets the {@code content} and returns a reference to this Builder
          * so that the methods can be chained together.
          *
-         * @param sourceURL the {@code sourceURL} to set
+         * @param content the {@code content} to set
          * @return a reference to this Builder
          */
-        public Builder sourceURL(String sourceURL) {
-            this.sourceURL = sourceURL;
+        public Builder content(String content) {
+            this.content = content;
             return this;
         }
 

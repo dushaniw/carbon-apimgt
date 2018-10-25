@@ -422,7 +422,7 @@ public class MappingUtil {
         documentDTO.setDocumentId(documentInfo.getId());
         documentDTO.setOtherTypeName(documentInfo.getOtherType());
         documentDTO.setSourceType(DocumentDTO.SourceTypeEnum.fromValue(documentInfo.getSourceType().getType()));
-        documentDTO.setSourceUrl(documentInfo.getSourceURL());
+        documentDTO.setSourceUrl(documentInfo.getContent());
         documentDTO.setFileName(documentInfo.getFileName());
         documentDTO.setSummary(documentInfo.getSummary());
         documentDTO.setVisibility(DocumentDTO.VisibilityEnum.fromValue(documentInfo.getVisibility().toString()));

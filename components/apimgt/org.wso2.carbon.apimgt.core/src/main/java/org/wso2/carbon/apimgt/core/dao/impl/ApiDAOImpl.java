@@ -1223,19 +1223,7 @@ public class ApiDAOImpl implements ApiDAO {
 
     @Override
     public String getLastUpdatedTimeOfDocument(String documentId) throws APIMgtDAOException {
-        return DocMetaDataDAO.getLastUpdatedTimeOfDocument(documentId);
-    }
-
-    @Override
-    public String getLastUpdatedTimeOfDocumentContent(String apiId, String documentId) throws APIMgtDAOException {
-        try (Connection connection = DAOUtil.getConnection()) {
-            return ApiResourceDAO
-                    .getResourceLastUpdatedTime(connection, apiId, documentId, ResourceCategory.DOC);
-        } catch (SQLException e) {
-            String errorMessage =
-                    "getting last updated time of document for API: " + apiId + ", Doc: " + documentId;
-            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + errorMessage, e);
-        }
+        return ApiDocDAO.getLastUpdatedTimeOfDocument(documentId);
     }
 
     /**
@@ -1901,7 +1889,7 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     public List<DocumentInfo> getDocumentsInfoList(String apiID) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
-            return DocMetaDataDAO.getDocumentInfoList(connection, apiID);
+            return ApiDocDAO.getDocumentInfoList(connection, apiID);
         } catch (SQLException e) {
             throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting Documents Info list for API: " + apiID, e);
         }
@@ -1910,54 +1898,40 @@ public class ApiDAOImpl implements ApiDAO {
     /**
      * Return Document info object
      *
-     * @param resourceID The UUID of the respective Document
+     * @param docID The UUID of the respective Document
      * @return {@link DocumentInfo} DocumentInfo meta data
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
     @CheckForNull
-    public DocumentInfo getDocumentInfo(String resourceID) throws APIMgtDAOException {
+    public DocumentInfo getDocumentInfo(String docID) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
-            return DocMetaDataDAO.getDocumentInfo(connection, resourceID);
+            return ApiDocDAO.getDocumentInfo(connection, docID);
         } catch (SQLException e) {
-            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
-                    "getting Document Info for Resource: " + resourceID, e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting Document Info for Resource: " + docID, e);
         }
     }
 
     /**
-     * @param resourceID The UUID of the respective Document
+     * Get file content of a given document
+     *
+     * @param docID The UUID of the respective Document
      * @return {@link InputStream} Document Info object
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
     @CheckForNull
-    public InputStream getDocumentFileContent(String resourceID) throws APIMgtDAOException {
+    public InputStream getDocumentFileContent(String docID) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
-            return ApiResourceDAO.getBinaryResource(connection, resourceID);
+            return ApiDocDAO.getBinaryDocContent(connection, docID);
         } catch (SQLException | IOException e) {
-            String msg = "getting Document File Content for Resource: " + resourceID;
+            String msg = "getting File Content for Document: " + docID;
             throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + msg, e);
         }
     }
 
     /**
-     * @param resourceID The UUID of the respective resource
-     * @return {@link String} Document inline content
-     * @throws APIMgtDAOException if error occurs while accessing data layer
-     */
-    @Override
-    public String getDocumentInlineContent(String resourceID) throws APIMgtDAOException {
-        try (Connection connection = DAOUtil.getConnection()) {
-            return ApiResourceDAO.getTextResource(connection, resourceID);
-        } catch (SQLException e) {
-            String msg = "getting Document Inline Content for Resource: " + resourceID;
-            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + msg, e);
-        }
-    }
-
-    /**
-     * Add artifact resource meta data to an API
+     * Add document info data to an API including the metadata and content for INLINE and URL type documents
      *
      * @param apiId        UUID of API
      * @param documentInfo {@link DocumentInfo}
@@ -1968,9 +1942,7 @@ public class ApiDAOImpl implements ApiDAO {
         try (Connection connection = DAOUtil.getConnection()) {
             try {
                 connection.setAutoCommit(false);
-                ApiResourceDAO.addResourceWithoutValue(connection, apiId, documentInfo.getId(), ResourceCategory.DOC);
-                DocMetaDataDAO.addDocumentInfo(connection, documentInfo);
-
+                ApiDocDAO.addDocumentInfo(connection, documentInfo, apiId);
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -1986,7 +1958,7 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
-     * Add artifact resource meta data to an API
+     * Update document info data of an API including metadata and content for INLINE and URL type documents
      *
      * @param apiId        UUID of API
      * @param documentInfo {@link DocumentInfo}
@@ -1999,8 +1971,7 @@ public class ApiDAOImpl implements ApiDAO {
         try (Connection connection = DAOUtil.getConnection()) {
             try {
                 connection.setAutoCommit(false);
-                DocMetaDataDAO.updateDocInfo(connection, documentInfo, updatedBy);
-
+                ApiDocDAO.updateDocInfo(connection, documentInfo, updatedBy);
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -2046,30 +2017,58 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#addDocumentInlineContent(String, String, String)
+     * Add API Document File content
+     *
+     * @param docID UUID of document
+     * @param content    File content as an InputStream
+     * @param updatedBy user who performs the action
+     * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    public void addDocumentInlineContent(String resourceID, String content, String updatedBy)
-            throws APIMgtDAOException {
-        try (Connection connection = DAOUtil.getConnection()) {
+    public void addAPIDocumentFileContent(String docID, InputStream content, String updatedBy) throws
+            APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()){
             try {
                 connection.setAutoCommit(false);
-                if (ApiResourceDAO.updateTextResource(connection, resourceID, content, updatedBy) == 0) {
-                    throw new APIMgtDAOException("Cannot add inline content for non existing document: " + resourceID +
-                            "",
-                            ExceptionCodes.DOCUMENT_NOT_FOUND);
+                if (ApiDocDAO.updateBinaryDocContent(connection, docID, content, updatedBy) == 0) {
+                    String msg = "Cannot add file content for non existing document: " + docID + ", updated by: "
+                            + updatedBy;
+                    throw new APIMgtDAOException(msg, ExceptionCodes.DOCUMENT_NOT_FOUND);
                 }
-                connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                String msg = "adding document inline content for document: " + resourceID + ", updatedBy: " + updatedBy;
+                String msg = "adding api document file content for document: " + docID + ", updatedBy: " + updatedBy;
                 throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + msg, e);
             } finally {
                 connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
-            String msg = "adding document inline content for document: " + resourceID + ", updatedBy: " + updatedBy;
+            String msg = "adding api document file content for document: " + docID + ", updatedBy: " + updatedBy;
             throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + msg, e);
+        }
+    }
+
+    /**
+     * Delete an API document
+     *
+     * @param docId   UUID of document
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    @Override
+    public void deleteAPIDocument(String docId) throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                ApiDocDAO.deleteDocument(connection, docId);
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "deleting API document: " + docId, e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "deleting API document: " + docId, e);
         }
     }
 
@@ -2111,10 +2110,8 @@ public class ApiDAOImpl implements ApiDAO {
 
     @Override
     public boolean isDocumentExist(String apiId, DocumentInfo documentInfo) throws APIMgtDAOException {
-        final String query = "SELECT 1 FROM AM_API_DOC_META_DATA INNER JOIN AM_API_RESOURCES " +
-                "ON AM_API_DOC_META_DATA.UUID=AM_API_RESOURCES.UUID WHERE AM_API_RESOURCES.API_ID = ? AND " +
-                "AM_API_DOC_META_DATA.NAME=?";
-        boolean exist = false;
+        final String query = "SELECT 1 FROM AM_API_DOCS WHERE AM_API_DOCS.API_ID = ? AND " +
+                "AM_API_DOCS.NAME=?";
         try (Connection connection = DAOUtil.getConnection(); PreparedStatement preparedStatement = connection
                 .prepareStatement(query)) {
             preparedStatement.setString(1, apiId);
@@ -2168,9 +2165,7 @@ public class ApiDAOImpl implements ApiDAO {
                         gatewayLabels(getLabelNamesForAPI(connection, apiPrimaryKey, APIMgtConstants
                                 .LABEL_TYPE_GATEWAY)).
                         storeLabels(getLabelNamesForAPI(connection, apiPrimaryKey, APIMgtConstants.LABEL_TYPE_STORE)).
-                        wsdlUri(ApiResourceDAO.
-                                getTextValueForCategory(connection, apiPrimaryKey,
-                                        ResourceCategory.WSDL_TEXT)).
+                        wsdlUri(getWSDL(apiPrimaryKey)).
                         transport(getTransports(connection, apiPrimaryKey)).
                         endpoint(getEndPointsForApi(connection, apiPrimaryKey)).
                         apiPermission(getPermissionsStringForApi(connection, apiPrimaryKey)).

@@ -383,31 +383,24 @@ public interface ApiDAO {
     List<DocumentInfo> getDocumentsInfoList(String apiID) throws APIMgtDAOException;
 
     /**
+     * Get info of a given document
      *
-     * @param resourceID The UUID of the respective resource
+     * @param docID The UUID of the respective document
      * @return {@link DocumentInfo} DocumentInfo meta data
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @CheckForNull
-    DocumentInfo getDocumentInfo(String resourceID) throws APIMgtDAOException;
+    DocumentInfo getDocumentInfo(String docID) throws APIMgtDAOException;
 
     /**
+     * Get file content of a given document
      *
-     * @param resourceID The UUID of the respective resource
+     * @param docID The UUID of the respective document
      * @return {@link InputStream} Document File content
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @CheckForNull
-    InputStream getDocumentFileContent(String resourceID) throws APIMgtDAOException;
-
-    /**
-     *
-     * @param resourceID The UUID of the respective resource
-     * @return {@link String} Document inline content
-     * @throws APIMgtDAOException if error occurs while accessing data layer
-     */
-    @CheckForNull
-    String getDocumentInlineContent(String resourceID) throws APIMgtDAOException;
+    InputStream getDocumentFileContent(String docID) throws APIMgtDAOException;
 
     /**
      * Add document info meta data to an API
@@ -419,7 +412,7 @@ public interface ApiDAO {
     void addDocumentInfo(String apiId, DocumentInfo documentInfo) throws APIMgtDAOException;
 
     /**
-     * Add document info meta data to an API
+     * Update document info data of an API
      *
      * @param apiId    UUID of API
      * @param documentInfo {@link DocumentInfo}
@@ -441,14 +434,14 @@ public interface ApiDAO {
             APIMgtDAOException;
 
     /**
-     * Add Document Inline content
+     * Add API Document File content
      *
-     * @param resourceID UUID of resource
-     * @param content    Inline content as a String
-     * @param updatedBy user who updates the resource
+     * @param resourceID UUID of document
+     * @param content    File content as an InputStream
+     * @param updatedBy user who performs the action
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    void addDocumentInlineContent(String resourceID, String content, String updatedBy) throws APIMgtDAOException;
+    void addAPIDocumentFileContent(String resourceID, InputStream content, String updatedBy) throws APIMgtDAOException;
 
     /**
      * Delete a document
@@ -457,6 +450,14 @@ public interface ApiDAO {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     void deleteDocument(String resourceID) throws APIMgtDAOException;
+
+    /**
+     * Delete an API document
+     *
+     * @param docId   UUID of document
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    void deleteAPIDocument(String docId) throws APIMgtDAOException;
 
     /**
      * used to deprecate older versions of the api
@@ -663,16 +664,6 @@ public interface ApiDAO {
      * @throws APIMgtDAOException throws if any DB level error occurred
      */
     String getLastUpdatedTimeOfDocument(String documentId) throws APIMgtDAOException;
-
-    /**
-     * Retrieves the last updated time of the content of a document of an API
-     *
-     * @param apiId UUID of API
-     * @param documentId UUID of document
-     * @return  Last updated time of document's content
-     * @throws APIMgtDAOException throws if any DB level error occurred
-     */
-    String getLastUpdatedTimeOfDocumentContent(String apiId, String documentId) throws APIMgtDAOException;
 
     /**
      * Retrieves the last updated time of the thumbnail image of an API

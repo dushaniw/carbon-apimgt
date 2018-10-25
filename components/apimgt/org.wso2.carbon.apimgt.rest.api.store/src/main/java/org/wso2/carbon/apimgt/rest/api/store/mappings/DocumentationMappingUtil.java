@@ -63,7 +63,7 @@ public class DocumentationMappingUtil {
         documentDTO.setType(DocumentDTO.TypeEnum.valueOf(documentInfo.getType().toString()));
         documentDTO.setOtherTypeName(documentInfo.getOtherType());
         documentDTO.setSourceType(DocumentDTO.SourceTypeEnum.valueOf(documentInfo.getSourceType().toString()));
-        documentDTO.setSourceUrl(documentInfo.getSourceURL());
+        documentDTO.setSourceUrl(documentInfo.getContent());
 
         return documentDTO;
     }
