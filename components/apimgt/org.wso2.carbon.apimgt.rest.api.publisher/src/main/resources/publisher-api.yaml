@@ -1675,7 +1675,9 @@ paths:
           - apim:api_create
       summary: Add a new document to an API
       description: |
-        This operation can be used to add a new documentation to an API. This operation only adds the metadata of a document. To add the actual content we need to use **Upload the content of an API document ** API once we obtain a document Id by this operation.
+        This operation can be used to add a new documentation to an API. This operation adds the content of INLINE type
+        and URL type documents along with the metadata of a document. To add the content for a FILE type document we
+        need to use **Upload the file content of an API document** API once we obtain a document Id by this operation.
       parameters:
         - $ref: '#/parameters/apiId'
         - in: body
@@ -1738,7 +1740,8 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"visibility\": \"API_LEVEL\",\n   \"sourceType\": \"INLINE\",\n   \"sourceUrl\": null,\n   \"otherTypeName\": null,\n   \"documentId\": \"0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\",\n   \"summary\": \"This is a sample documentation\",\n   \"name\": \"PhoneVerification API Documentation\",\n   \"type\": \"HOWTO\"\n}"
       summary: Get a document of an API
       description: |
-        This operation can be used to retrieve a particular document's metadata associated with an API.
+        This operation can be used to retrieve a particular document's data associated with an API including the content
+        of INLINE type and URL type documents.
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/documentId'
@@ -1797,7 +1800,8 @@ paths:
           - apim:api_update
       summary: Update a document of an API
       description: |
-        This operation can be used to update metadata of an API's document.
+        This operation can be used to update an API's document. This operation allows to update both metadata and content
+        of INLINE type and URL type documents.
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/documentId'
@@ -1980,7 +1984,7 @@ paths:
               $ref: '#/definitions/Error'
 
   #----------------------------------------------------------------------------
-  # Upload a file or add inline content to a document of a certain API
+  # Upload a file content to a document of a certain API
   #----------------------------------------------------------------------------
       post:
         consumes:
@@ -2003,14 +2007,13 @@ paths:
         security:
           - OAuth2Security:
             - apim:api_create
-        summary: Upload the content of an API document
+        summary: Upload the file content of an API document
         description: |
-          Thid operation can be used to upload a file or add inline content to an API document.
+          This operation can be used to upload a file content to an API document.
 
           **IMPORTANT:**
-          * Either **file** or **inlineContent** form data parameters should be specified at one time.
+          * The **file** form data parameter should be specified.
           * Document's source type should be **FILE** in order to upload a file to the document using **file** parameter.
-          * Document's source type should be **INLINE** in order to add inline content to the document using **inlineContent** parameter.
         parameters:
           - $ref: '#/parameters/apiId'
           - $ref: '#/parameters/documentId'
@@ -2018,11 +2021,6 @@ paths:
             name: file
             description: Document to upload
             type: file
-            required: false
-          - in: formData
-            name: inlineContent
-            description: Inline content of the document
-            type: string
             required: false
           - $ref: '#/parameters/If-Match'
           - $ref: '#/parameters/If-Unmodified-Since'
@@ -4179,15 +4177,12 @@ definitions:
           - URL
           - FILE
         example: INLINE
-      sourceUrl:
-        type: string
-        example: ""
       fileName:
         type: string
         example: ""
-      inlineContent:
+      content:
         type: string
-        example: "This is doc content. This can have many lines."
+        example: "This includes either the documentation URL or an inline content which is a short doc content."
       otherTypeName:
         type: string
         example: ""
