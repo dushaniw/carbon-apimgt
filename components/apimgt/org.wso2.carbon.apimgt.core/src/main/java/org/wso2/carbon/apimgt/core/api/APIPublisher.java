@@ -163,7 +163,7 @@ public interface APIPublisher extends APIManager {
     String createNewAPIVersion(String apiId, String newVersion) throws APIManagementException;
 
     /**
-     * Attach Documentation (without content) to an API
+     * Attach Documentation to an API.
      *
      * @param apiId        UUID of API
      * @param documentInfo Document Summary
@@ -175,11 +175,11 @@ public interface APIPublisher extends APIManager {
     /**
      * Add a API document (of source type FILE) with a file
      *
-     * @param resourceId UUID of document
+     * @param docID UUID of document
      * @param content    content of the file as an Input Stream
      * @throws APIManagementException if failed to add the file
      */
-    void uploadAPIDocumentationFile(String resourceId, InputStream content) throws APIManagementException;
+    void uploadAPIDocumentationFile(String docID, InputStream content) throws APIManagementException;
 
     /**
      * Removes a given API documentation
@@ -188,24 +188,6 @@ public interface APIPublisher extends APIManager {
      * @throws APIManagementException if failed to remove documentation
      */
     void removeAPIDocumentation(String docId) throws APIManagementException;
-
-    /**
-     * Add a document (of source type FILE) with a file
-     *
-     * @param resourceId UUID of resource
-     * @param content    content of the file as an Input Stream
-     * @param dataType   File mime type
-     * @throws APIManagementException if failed to add the file
-     */
-    void uploadDocumentationFile(String resourceId, InputStream content, String dataType) throws APIManagementException;
-
-    /**
-     * Removes a given documentation
-     *
-     * @param docId Document Id
-     * @throws APIManagementException if failed to remove documentation
-     */
-    void removeDocumentation(String docId) throws APIManagementException;
 
     /**
      * Checks if a given API name exists in the registry

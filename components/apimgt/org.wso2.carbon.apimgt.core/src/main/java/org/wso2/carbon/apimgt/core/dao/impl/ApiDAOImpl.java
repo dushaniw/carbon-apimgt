@@ -1929,7 +1929,7 @@ public class ApiDAOImpl implements ApiDAO {
         try (Connection connection = DAOUtil.getConnection()) {
             return ApiDocDAO.getDocumentInfo(connection, docID);
         } catch (SQLException e) {
-            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting Document Info for Resource: " + docID, e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting Document Info for Document: " + docID, e);
         }
     }
 
@@ -2010,34 +2010,6 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#addDocumentFileContent(String, InputStream, String, String)
-     */
-    @Override
-    public void addDocumentFileContent(String resourceID, InputStream content, String dataType, String updatedBy) throws
-            APIMgtDAOException {
-        try (Connection connection = DAOUtil.getConnection()) {
-            try {
-                connection.setAutoCommit(false);
-                if (ApiResourceDAO.updateBinaryResource(connection, resourceID, content, dataType, updatedBy) == 0) {
-                    String msg = "Cannot add file content for non existing document: " + resourceID + ", updated by: "
-                            + updatedBy;
-                    throw new APIMgtDAOException(msg, ExceptionCodes.DOCUMENT_NOT_FOUND);
-                }
-                connection.commit();
-            } catch (SQLException e) {
-                connection.rollback();
-                String msg = "adding document file content for document: " + resourceID + ", updatedBy: " + updatedBy;
-                throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + msg, e);
-            } finally {
-                connection.setAutoCommit(DAOUtil.isAutoCommit());
-            }
-        } catch (SQLException e) {
-            String msg = "adding document file content for document: " + resourceID + ", updatedBy: " + updatedBy;
-            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + msg, e);
-        }
-    }
-
-    /**
      * Add API Document File content
      *
      * @param docID UUID of document
@@ -2100,7 +2072,7 @@ public class ApiDAOImpl implements ApiDAO {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    public void deleteDocument(String resourceID) throws APIMgtDAOException {
+    public void deleteResource(String resourceID) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
             try {
                 connection.setAutoCommit(false);

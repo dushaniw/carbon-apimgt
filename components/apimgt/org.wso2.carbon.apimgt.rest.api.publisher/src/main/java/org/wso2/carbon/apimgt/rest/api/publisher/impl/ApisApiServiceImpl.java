@@ -754,7 +754,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
             }
             if (body.getSourceType() == DocumentDTO.SourceTypeEnum.URL &&
-                    (StringUtils.isBlank(body.getContent()) || !RestApiUtil.isURL(body.getSourceUrl()))) {
+                    (StringUtils.isBlank(body.getContent()) || !RestApiUtil.isURL(body.getContent()))) {
                 //check content is not null and in correct URL format if sourceType is URL
                 String msg = "Invalid document source URL Format";
                 log.error(msg);
@@ -850,8 +850,14 @@ public class ApisApiServiceImpl extends ApisApiService {
                 RestApiUtil.handleBadRequest("otherTypeName cannot be empty if type is OTHER.", log);
             }
             String content = body.getContent();
+            if(body.getSourceType() == DocumentDTO.SourceTypeEnum.FILE && (!StringUtils.isBlank(content))){
+                //check content is null if sourcetype is FILE
+                RestApiUtil.handleBadRequest("File type document cannot have URL or inline content. Upload file " +
+                        "content seperately", log);
+            }
             if (body.getSourceType() == DocumentDTO.SourceTypeEnum.URL &&
                     (StringUtils.isBlank(content) || !RestApiUtil.isURL(content))) {
+                //check content is not null and in correct URL format if sourcetype is URL
                 RestApiUtil.handleBadRequest("Invalid document source Url Format", log);
             }
             if (body.getSourceType() == DocumentDTO.SourceTypeEnum.INLINE && StringUtils.isBlank(content)){

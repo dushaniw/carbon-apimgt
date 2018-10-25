@@ -422,26 +422,14 @@ public interface ApiDAO {
     void updateDocumentInfo(String apiId, DocumentInfo documentInfo, String updatedBy) throws APIMgtDAOException;
 
     /**
-     * Add Document File content
-     *
-     * @param resourceID UUID of resource
-     * @param content    File content as an InputStream
-     * @param dataType File mime type
-     * @param updatedBy user who performs the action
-     * @throws APIMgtDAOException if error occurs while accessing data layer
-     */
-    void addDocumentFileContent(String resourceID, InputStream content, String dataType, String updatedBy) throws
-            APIMgtDAOException;
-
-    /**
      * Add API Document File content
      *
-     * @param resourceID UUID of document
+     * @param docID UUID of document
      * @param content    File content as an InputStream
      * @param updatedBy user who performs the action
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    void addAPIDocumentFileContent(String resourceID, InputStream content, String updatedBy) throws APIMgtDAOException;
+    void addAPIDocumentFileContent(String docID, InputStream content, String updatedBy) throws APIMgtDAOException;
 
     /**
      * Delete a document
@@ -449,7 +437,7 @@ public interface ApiDAO {
      * @param resourceID   UUID of resource
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    void deleteDocument(String resourceID) throws APIMgtDAOException;
+    void deleteResource(String resourceID) throws APIMgtDAOException;
 
     /**
      * Delete an API document

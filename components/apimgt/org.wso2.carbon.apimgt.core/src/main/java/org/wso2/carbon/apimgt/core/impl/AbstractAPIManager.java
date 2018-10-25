@@ -310,12 +310,17 @@ public abstract class AbstractAPIManager implements APIManager {
                     if (inputStream != null) {
                         documentContentBuilder = documentContentBuilder.fileContent(inputStream);
                     } else {
-                        throw new APIManagementException("Couldn't find file content of  document", ExceptionCodes
+                        throw new APIManagementException("Couldn't find file content of document", ExceptionCodes
                                 .DOCUMENT_CONTENT_NOT_FOUND);
                     }
+                } else if ((DocumentInfo.SourceType.INLINE.equals(documentInfo.getSourceType()) ||
+                        DocumentInfo.SourceType.URL.equals(documentInfo.getSourceType())) &&
+                        (documentInfo.getContent() == null)) {
+                    throw new APIManagementException("Couldn't find any inline or URL content of document",
+                            ExceptionCodes.DOCUMENT_CONTENT_NOT_FOUND);
                 }
             } else {
-                throw new APIManagementException("Couldn't fnd document", ExceptionCodes.DOCUMENT_NOT_FOUND);
+                throw new APIManagementException("Couldn't find document", ExceptionCodes.DOCUMENT_NOT_FOUND);
             }
             return documentContentBuilder.build();
         } catch (APIMgtDAOException e) {

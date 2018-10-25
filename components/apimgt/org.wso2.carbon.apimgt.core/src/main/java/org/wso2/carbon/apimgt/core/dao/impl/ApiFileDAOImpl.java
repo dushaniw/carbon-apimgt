@@ -243,16 +243,6 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#addDocumentFileContent(String resourceID, InputStream content, String fileName,
-     * String updatedBy)
-     */
-    @Override
-    public void addDocumentFileContent(String resourceID, InputStream content, String dataType,
-                                       String updatedBy) throws APIMgtDAOException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
      * @see ApiDAO#addAPIDocumentFileContent(String docID, InputStream content, String updatedBy
      */
     @Override
@@ -262,10 +252,10 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#deleteDocument(String resourceID)
+     * @see ApiDAO#deleteResource(String resourceID)
      */
     @Override
-    public void deleteDocument(String resourceID) throws APIMgtDAOException {
+    public void deleteResource(String resourceID) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 

@@ -32,9 +32,7 @@ import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.URLConnection;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -95,15 +93,15 @@ public class ApiImportExportManager {
                 if (APIMgtConstants.GLOBAL_ENDPOINT.equals(endpointEntry.getValue().getApplicableLevel())) {
                     Endpoint endpoint = new Endpoint.Builder(apiPublisher.getEndpoint(endpointEntry.getValue().getId
                             ())).id("").build();
-                    endpoints.replace(endpointEntry.getKey(),endpoint);
+                    endpoints.replace(endpointEntry.getKey(), endpoint);
                     endpointSet.add(endpoint);
                 }
             }
             // get Endpoints at Resource Level
-            Map<String,UriTemplate> uriTemplateMap = api.getUriTemplates();
+            Map<String, UriTemplate> uriTemplateMap = api.getUriTemplates();
             uriTemplateMap.forEach((k, v) -> {
                 UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder(v);
-                Map<String,Endpoint> resourceEndpoints = uriTemplateBuilder.getEndpoint();
+                Map<String, Endpoint> resourceEndpoints = uriTemplateBuilder.getEndpoint();
                 resourceEndpoints.forEach((type, value) -> {
                     Endpoint endpoint = null;
                     if (APIMgtConstants.GLOBAL_ENDPOINT.equals(value.getApplicableLevel())) {
@@ -114,10 +112,10 @@ public class ApiImportExportManager {
                         } catch (APIManagementException e) {
                             log.error("Error in getting endpoints for Resource: " + v.getTemplateId(), e);
                         }
-                    }else{
+                    } else {
                         endpoint = new Endpoint.Builder(value).id("").build();
                     }
-                    resourceEndpoints.replace(type,endpoint);
+                    resourceEndpoints.replace(type, endpoint);
                 });
                 uriTemplateMap.replace(k, uriTemplateBuilder.endpoint(resourceEndpoints).build());
             });
@@ -208,7 +206,7 @@ public class ApiImportExportManager {
         String swaggerDefinition = apiDetails.getSwaggerDefinition();
         String gatewayConfig = apiDetails.getGatewayConfiguration();
         Map<String, Endpoint> endpointTypeToIdMap = apiDetails.getApi().getEndpoint();
-        Map<String,UriTemplate> uriTemplateMap = apiDetails.getApi().getUriTemplates();
+        Map<String, UriTemplate> uriTemplateMap = apiDetails.getApi().getUriTemplates();
         // endpoints
         for (Endpoint endpoint : apiDetails.getEndpoints()) {
             try {
@@ -226,23 +224,23 @@ public class ApiImportExportManager {
                     // endpoint with same name exists, add to endpointTypeToIdMap
                     //     endpointTypeToIdMap.put(endpoint.getType(), existingEndpoint.getId());
                 }
-                endpointTypeToIdMap.forEach((String k, Endpoint v) ->{
-                    if (endpoint.getName().equals(v.getName())){
+                endpointTypeToIdMap.forEach((String k, Endpoint v) -> {
+                    if (endpoint.getName().equals(v.getName())) {
                         Endpoint replacedEndpoint = new Endpoint.Builder(v).id(endpointId).build();
-                        endpointTypeToIdMap.replace(k,replacedEndpoint);
+                        endpointTypeToIdMap.replace(k, replacedEndpoint);
                     }
                 });
-                uriTemplateMap.forEach(((String templateId, UriTemplate uriTemplate) ->{
+                uriTemplateMap.forEach(((String templateId, UriTemplate uriTemplate) -> {
                     UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder(uriTemplate);
-                    Map<String,Endpoint> uriEndpointMap = uriTemplateBuilder.getEndpoint();
+                    Map<String, Endpoint> uriEndpointMap = uriTemplateBuilder.getEndpoint();
                     uriEndpointMap.forEach((String type, Endpoint endpoint1) -> {
-                        if (endpoint.getName().equals(endpoint1.getName())){
+                        if (endpoint.getName().equals(endpoint1.getName())) {
                             Endpoint replacedEndpoint = new Endpoint.Builder(endpoint1).id(endpointId).build();
-                            uriEndpointMap.replace(type,replacedEndpoint);
+                            uriEndpointMap.replace(type, replacedEndpoint);
                         }
                     });
-                    uriTemplateMap.replace(templateId,uriTemplateBuilder.endpoint(uriEndpointMap).build());
-                } ));
+                    uriTemplateMap.replace(templateId, uriTemplateBuilder.endpoint(uriEndpointMap).build());
+                }));
 
             } catch (APIManagementException e) {
                 // skip adding this API; log and continue
@@ -265,9 +263,8 @@ public class ApiImportExportManager {
             for (DocumentContent aDocContent : apiDetails.getDocumentContents()) {
                 // add documentation
                 if (aDocContent.getDocumentInfo().getSourceType().equals(DocumentInfo.SourceType.FILE)) {
-                    apiPublisher.uploadDocumentationFile(aDocContent.getDocumentInfo().getId(),
-                            aDocContent.getFileContent(), 
-                            URLConnection.guessContentTypeFromStream(aDocContent.getFileContent()));
+                    apiPublisher.uploadAPIDocumentationFile(aDocContent.getDocumentInfo().getId(),
+                            aDocContent.getFileContent());
                 }
             }
 
@@ -275,10 +272,6 @@ public class ApiImportExportManager {
             // no need to throw, log and continue
             log.error("Error while adding Document details for API: " + apiDetails.getApi().getName() + ", version: " +
                     apiDetails.getApi().getVersion(), e);
-        } catch (IOException e) {
-            // no need to throw, log and continue
-            log.error("Error while retrieving content type of the File documentation of API : " 
-                    + apiDetails.getApi().getName() + ", version: " + apiDetails.getApi().getVersion(), e);
         }
 
         // add thumbnail
@@ -309,7 +302,6 @@ public class ApiImportExportManager {
             try {
                 apiPublisher.updateEndpoint(endpoint);
                 endpointTypeToIdMap.put(endpoint.getType(), endpoint);
-
             } catch (APIManagementException e) {
                 // skip updating this API, log and continue
                 log.error("Error while updating the endpoint with id: " + endpoint.getId() + ", type: " + endpoint
@@ -317,7 +309,6 @@ public class ApiImportExportManager {
                         ().getVersion());
             }
         }
-
 
         API.APIBuilder apiBuilder = new API.APIBuilder(apiDetails.getApi());
         apiPublisher.updateAPI(apiBuilder.apiDefinition(swaggerDefinition).gatewayConfig(gatewayConfig).
@@ -333,20 +324,14 @@ public class ApiImportExportManager {
             for (DocumentContent docContent : docContents) {
                 // update documentation
                 if (docContent.getDocumentInfo().getSourceType().equals(DocumentInfo.SourceType.FILE)) {
-                    apiPublisher
-                            .uploadDocumentationFile(docContent.getDocumentInfo().getId(), docContent.getFileContent(),
-                                    URLConnection.guessContentTypeFromStream(docContent.getFileContent()));
+                    apiPublisher.uploadAPIDocumentationFile(docContent.getDocumentInfo().getId(),
+                            docContent.getFileContent());
                 }
             }
-
         } catch (APIManagementException e) {
             // no need to throw, log and continue
             log.error("Error while adding Document details for API: " + apiDetails.getApi().getName() + ", version: " +
                     apiDetails.getApi().getVersion(), e);
-        } catch (IOException e) {
-            // no need to throw, log and continue
-            log.error("Error while retrieving content type of the File documentation of API : "
-                    + apiDetails.getApi().getName() + ", version: " + apiDetails.getApi().getVersion(), e);
         }
 
         // update thumbnail
