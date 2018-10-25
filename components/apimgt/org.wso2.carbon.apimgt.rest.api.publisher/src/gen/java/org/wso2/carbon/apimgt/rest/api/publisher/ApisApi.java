@@ -296,7 +296,7 @@ public class ApisApi implements Microservice  {
     @Path("/{apiId}/documents/{documentId}/content")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Upload the content of an API document", notes = "Thid operation can be used to upload a file or add inline content to an API document.  **IMPORTANT:** * Either **file** or **inlineContent** form data parameters should be specified at one time. * Document's source type should be **FILE** in order to upload a file to the document using **file** parameter. * Document's source type should be **INLINE** in order to add inline content to the document using **inlineContent** parameter. ", response = DocumentDTO.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Upload the file content of an API document", notes = "This operation can be used to upload a file content to an API document.  **IMPORTANT:** * The **file** form data parameter should be specified. * Document's source type should be **FILE** in order to upload a file to the document using **file** parameter. ", response = DocumentDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:api_create", description = "Create API")
         })
@@ -314,13 +314,12 @@ public class ApisApi implements Microservice  {
 ,
             @FormDataParam("file") InputStream fileInputStream,
             @FormDataParam("file") FileInfo fileDetail
-,@ApiParam(value = "Inline content of the document")@FormDataParam("inlineContent")  String inlineContent
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
  ,@Context Request request)
     throws NotFoundException {
         
-        return delegate.apisApiIdDocumentsDocumentIdContentPost(apiId,documentId,fileInputStream, fileDetail,inlineContent,ifMatch,ifUnmodifiedSince,request);
+        return delegate.apisApiIdDocumentsDocumentIdContentPost(apiId,documentId,fileInputStream, fileDetail,ifMatch,ifUnmodifiedSince,request);
     }
     @OPTIONS
     @DELETE
@@ -352,7 +351,7 @@ public class ApisApi implements Microservice  {
     @Path("/{apiId}/documents/{documentId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Get a document of an API", notes = "This operation can be used to retrieve a particular document's metadata associated with an API. ", response = DocumentDTO.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Get a document of an API", notes = "This operation can be used to retrieve a particular document's data associated with an API including the content of INLINE type and URL type documents. ", response = DocumentDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:api_view", description = "View API")
         })
@@ -379,7 +378,7 @@ public class ApisApi implements Microservice  {
     @Path("/{apiId}/documents/{documentId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Update a document of an API", notes = "This operation can be used to update metadata of an API's document. ", response = DocumentDTO.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Update a document of an API", notes = "This operation can be used to update an API's document. This operation allows to update both metadata and content of INLINE type and URL type documents. ", response = DocumentDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:api_update", description = "Update API")
         })
@@ -436,7 +435,7 @@ public class ApisApi implements Microservice  {
     @Path("/{apiId}/documents")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Add a new document to an API", notes = "This operation can be used to add a new documentation to an API. This operation only adds the metadata of a document. To add the actual content we need to use **Upload the content of an API document ** API once we obtain a document Id by this operation. ", response = DocumentDTO.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Add a new document to an API", notes = "This operation can be used to add a new documentation to an API. This operation adds the content of INLINE type and URL type documents along with the metadata of a document. To add the content for a FILE type document we need to use **Upload the file content of an API document** API once we obtain a document Id by this operation. ", response = DocumentDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:api_create", description = "Create API")
         })

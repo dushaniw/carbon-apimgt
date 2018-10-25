@@ -103,14 +103,11 @@ public class DocumentDTO   {
   @SerializedName("sourceType")
   private SourceTypeEnum sourceType = null;
 
-  @SerializedName("sourceUrl")
-  private String sourceUrl = null;
-
   @SerializedName("fileName")
   private String fileName = null;
 
-  @SerializedName("inlineContent")
-  private String inlineContent = null;
+  @SerializedName("content")
+  private String content = null;
 
   @SerializedName("otherTypeName")
   private String otherTypeName = null;
@@ -256,24 +253,6 @@ public class DocumentDTO   {
     this.sourceType = sourceType;
   }
 
-  public DocumentDTO sourceUrl(String sourceUrl) {
-    this.sourceUrl = sourceUrl;
-    return this;
-  }
-
-   /**
-   * Get sourceUrl
-   * @return sourceUrl
-  **/
-  @ApiModelProperty(example = "", value = "")
-  public String getSourceUrl() {
-    return sourceUrl;
-  }
-
-  public void setSourceUrl(String sourceUrl) {
-    this.sourceUrl = sourceUrl;
-  }
-
   public DocumentDTO fileName(String fileName) {
     this.fileName = fileName;
     return this;
@@ -292,22 +271,22 @@ public class DocumentDTO   {
     this.fileName = fileName;
   }
 
-  public DocumentDTO inlineContent(String inlineContent) {
-    this.inlineContent = inlineContent;
+  public DocumentDTO content(String content) {
+    this.content = content;
     return this;
   }
 
    /**
-   * Get inlineContent
-   * @return inlineContent
+   * Get content
+   * @return content
   **/
-  @ApiModelProperty(example = "This is doc content. This can have many lines.", value = "")
-  public String getInlineContent() {
-    return inlineContent;
+  @ApiModelProperty(example = "This includes either the documentation URL or an inline content which is a short doc content.", value = "")
+  public String getContent() {
+    return content;
   }
 
-  public void setInlineContent(String inlineContent) {
-    this.inlineContent = inlineContent;
+  public void setContent(String content) {
+    this.content = content;
   }
 
   public DocumentDTO otherTypeName(String otherTypeName) {
@@ -451,9 +430,8 @@ public class DocumentDTO   {
         Objects.equals(this.type, document.type) &&
         Objects.equals(this.summary, document.summary) &&
         Objects.equals(this.sourceType, document.sourceType) &&
-        Objects.equals(this.sourceUrl, document.sourceUrl) &&
         Objects.equals(this.fileName, document.fileName) &&
-        Objects.equals(this.inlineContent, document.inlineContent) &&
+        Objects.equals(this.content, document.content) &&
         Objects.equals(this.otherTypeName, document.otherTypeName) &&
         Objects.equals(this.permission, document.permission) &&
         Objects.equals(this.visibility, document.visibility) &&
@@ -465,7 +443,7 @@ public class DocumentDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(documentId, name, type, summary, sourceType, sourceUrl, fileName, inlineContent, otherTypeName, permission, visibility, createdTime, createdBy, lastUpdatedTime, lastUpdatedBy);
+    return Objects.hash(documentId, name, type, summary, sourceType, fileName, content, otherTypeName, permission, visibility, createdTime, createdBy, lastUpdatedTime, lastUpdatedBy);
   }
 
   @Override
@@ -478,9 +456,8 @@ public class DocumentDTO   {
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    summary: ").append(toIndentedString(summary)).append("\n");
     sb.append("    sourceType: ").append(toIndentedString(sourceType)).append("\n");
-    sb.append("    sourceUrl: ").append(toIndentedString(sourceUrl)).append("\n");
     sb.append("    fileName: ").append(toIndentedString(fileName)).append("\n");
-    sb.append("    inlineContent: ").append(toIndentedString(inlineContent)).append("\n");
+    sb.append("    content: ").append(toIndentedString(content)).append("\n");
     sb.append("    otherTypeName: ").append(toIndentedString(otherTypeName)).append("\n");
     sb.append("    permission: ").append(toIndentedString(permission)).append("\n");
     sb.append("    visibility: ").append(toIndentedString(visibility)).append("\n");

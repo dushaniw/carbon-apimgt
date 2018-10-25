@@ -76,7 +76,6 @@ public abstract class ApisApiService {
     public abstract Response apisApiIdDocumentsDocumentIdContentPost(String apiId
  ,String documentId
  ,InputStream fileInputStream, FileInfo fileDetail
- ,String inlineContent
  ,String ifMatch
  ,String ifUnmodifiedSince
   ,Request request) throws NotFoundException;
