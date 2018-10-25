@@ -187,18 +187,6 @@ public class AbstractAPIManagerTestCase {
         verify(apiDAO, times(1)).getLastUpdatedTimeOfDocument(DOC_ID);
     }
 
-    @Test(description = "Getting last updated time of Document content")
-    public void testGetLastUpdatedTimeOfDocumentContent() throws APIManagementException {
-
-        ApiDAO apiDAO = mock(ApiDAO.class);
-        DAOFactory daoFactory = mock(DAOFactory.class);
-        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
-        AbstractAPIManager apiPublisher = getApiPublisherImpl(daoFactory);
-        when(apiDAO.getLastUpdatedTimeOfDocumentContent(UUID, DOC_ID)).thenReturn(LAST_UPDATED_TIME);
-        apiPublisher.getLastUpdatedTimeOfDocumentContent(UUID, DOC_ID);
-        verify(apiDAO, times(1)).getLastUpdatedTimeOfDocumentContent(UUID, DOC_ID);
-    }
-
     @Test(description = "Getting last updated time of API Thumbnail Image")
     public void testGetLastUpdatedTimeOfAPIThumbnailImage() throws APIManagementException {
 
@@ -257,6 +245,7 @@ public class AbstractAPIManagerTestCase {
         DocumentInfo.Builder builder = new DocumentInfo.Builder();
         builder.name("CalculatorDoc");
         builder.sourceType(DocumentInfo.SourceType.FILE);
+        builder.fileName("sample.pdf");
         DocumentInfo documentInfo = builder.build();
         when(apiDAO.getDocumentInfo(DOC_ID)).thenReturn(documentInfo);
         String stream = "This is sample file content";
@@ -273,12 +262,11 @@ public class AbstractAPIManagerTestCase {
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
         AbstractAPIManager apiPublisher = getApiPublisherImpl(daoFactory);
-        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo();
+        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultInlineDocumentationInfo();
         when(apiDAO.getDocumentInfo(DOC_ID)).thenReturn(documentInfo);
-        when(apiDAO.getDocumentInlineContent(DOC_ID))
-                .thenReturn(SampleTestObjectCreator.createDefaultInlineDocumentationContent());
         apiPublisher.getDocumentationContent(DOC_ID);
-        verify(apiDAO, times(1)).getDocumentInlineContent(DOC_ID);
+        verify(apiDAO, times(1)).getDocumentInfo(DOC_ID);
+        verify(apiDAO, times(0)).getDocumentFileContent(DOC_ID);
     }
 
     /**
@@ -438,21 +426,6 @@ public class AbstractAPIManagerTestCase {
         verify(apiDAO, times(0)).getLastUpdatedTimeOfDocument(DOC_ID);
     }
 
-    @Test(description = "Exception when getting last updated time of Document Content",
-            expectedExceptions = APIManagementException.class)
-    public void testGetLastUpdatedTimeOfDocumentContentException() throws APIManagementException {
-
-        ApiDAO apiDAO = mock(ApiDAO.class);
-        DAOFactory daoFactory = mock(DAOFactory.class);
-        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
-        AbstractAPIManager apiPublisher = getApiPublisherImpl(daoFactory);
-        when(apiDAO.getLastUpdatedTimeOfDocumentContent(UUID, DOC_ID)).thenThrow(new APIMgtDAOException(
-                "Error occurred while retrieving the last updated time of the document's content " + DOC_ID,
-                new SQLException()));
-        apiPublisher.getLastUpdatedTimeOfDocumentContent(UUID, DOC_ID);
-        verify(apiDAO, times(0)).getLastUpdatedTimeOfDocumentContent(UUID, DOC_ID);
-    }
-
     @Test(description = "Exception when getting last updated time of API Thumbnail Image",
             expectedExceptions = APIManagementException.class)
     public void testGetLastUpdatedTimeOfAPIThumbnailImageException() throws APIManagementException {
@@ -523,6 +496,7 @@ public class AbstractAPIManagerTestCase {
         AbstractAPIManager apiPublisher = getApiPublisherImpl(daoFactory);
         DocumentInfo.Builder builder = new DocumentInfo.Builder();
         builder.name("CalculatorDoc");
+        builder.fileName("sample.pdf");
         builder.sourceType(DocumentInfo.SourceType.FILE);
         DocumentInfo documentInfo = builder.build();
         when(apiDAO.getDocumentInfo(DOC_ID)).thenReturn(documentInfo);
@@ -539,11 +513,10 @@ public class AbstractAPIManagerTestCase {
         DAOFactory daoFactory = mock(DAOFactory.class);
         Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
         AbstractAPIManager apiPublisher = getApiPublisherImpl(daoFactory);
-        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo();
+        DocumentInfo documentInfo = SampleTestObjectCreator.createInlineContentNullDocumentationInfo();
         when(apiDAO.getDocumentInfo(DOC_ID)).thenReturn(documentInfo);
-        when(apiDAO.getDocumentInlineContent(DOC_ID)).thenReturn(null);
         apiPublisher.getDocumentationContent(DOC_ID);
-        verify(apiDAO, times(0)).getDocumentInlineContent(DOC_ID);
+        verify(apiDAO, times(0)).getDocumentFileContent(DOC_ID);
     }
 
     @Test(description = "Getting Documentation content when document cannot be found",
@@ -557,7 +530,6 @@ public class AbstractAPIManagerTestCase {
         when(apiDAO.getDocumentInfo(DOC_ID)).thenReturn(null);
         apiPublisher.getDocumentationContent(DOC_ID);
         verify(apiDAO, times(0)).getDocumentFileContent(DOC_ID);
-        verify(apiDAO, times(0)).getDocumentInlineContent(DOC_ID);
     }
 
     @Test(description = "Exception when getting Documentation content due to error retrieving document content",
@@ -573,7 +545,6 @@ public class AbstractAPIManagerTestCase {
                         new SQLException()));
         apiPublisher.getDocumentationContent(DOC_ID);
         verify(apiDAO, times(0)).getDocumentFileContent(DOC_ID);
-        verify(apiDAO, times(0)).getDocumentInlineContent(DOC_ID);
     }
 
     @Test(description = "Get Label by ID")

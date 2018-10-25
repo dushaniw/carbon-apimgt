@@ -142,7 +142,9 @@ public class SampleTestObjectCreator {
     private static final String PATH_THUMBNAIL_IMG_2 = "api/thumbnail2.jpg";
     private static final String PATH_INLINE_DOC_1 = "document/inline1.txt";
     private static final String PATH_INLINE_DOC_2 = "document/inline2.txt";
-    private static final String PATH_FILE_DOC_1 = "document/pdf-sample.pdf";
+    private static final String FILE_DOC_NAME = "pdf-sample.pdf";
+    private static final String PATH_FILE_DOC_1 = "document/pdf-sample1.pdf";
+    private static final String PATH_FILE_DOC_2 = "document/pdf-sample2.pdf";
     private static final String PATH_WSDL11_File_1 = "wsdl/WeatherForecast.wsdl";
     private static final String PATH_WSDL11_File_2 = "wsdl/stockQuote.wsdl";
     private static final String PATH_WSDL20_File_1 = "wsdl/myServiceWsdl2.wsdl";
@@ -522,7 +524,12 @@ public class SampleTestObjectCreator {
         return Thread.currentThread().getContextClassLoader().getResourceAsStream(PATH_THUMBNAIL_IMG_2);
     }
 
-    public static DocumentInfo createDefaultDocumentationInfo() {
+    /**
+     * Creates a inline type documentation info sample
+     *
+     * @return a inline type documentation info sample
+     */
+    public static DocumentInfo createDefaultInlineDocumentationInfo() throws IOException {
         Instant time = APIUtils.getCurrentUTCTime();
         //created by admin
         DocumentInfo.Builder builder = new DocumentInfo.Builder();
@@ -531,7 +538,7 @@ public class SampleTestObjectCreator {
         builder.type(DocumentInfo.DocType.HOWTO);
         builder.summary("Summary of Calculator Documentation");
         builder.sourceType(DocumentInfo.SourceType.INLINE);
-        builder.sourceURL(EMPTY_STRING);
+        builder.content(createDefaultInlineDocumentationContent());
         builder.otherType(EMPTY_STRING);
         builder.visibility(DocumentInfo.Visibility.API_LEVEL);
         builder.createdTime(time);
@@ -539,7 +546,12 @@ public class SampleTestObjectCreator {
         return builder.build();
     }
 
-    public static DocumentInfo createAlternativeDocumentationInfo(String uuid) {
+    /**
+     * Creates a inline type documentation info sample
+     *
+     * @return a inline type documentation info sample
+     */
+    public static DocumentInfo createAlternativeInlineDocumentationInfo(String uuid) throws IOException {
         Instant time = APIUtils.getCurrentUTCTime();
         //created by admin
         DocumentInfo.Builder builder = new DocumentInfo.Builder();
@@ -548,7 +560,28 @@ public class SampleTestObjectCreator {
         builder.type(DocumentInfo.DocType.HOWTO);
         builder.summary("Summary of Calculator Documentation - alternative");
         builder.sourceType(DocumentInfo.SourceType.INLINE);
-        builder.sourceURL(EMPTY_STRING);
+        builder.content(createAlternativeInlineDocumentationContent());
+        builder.otherType(EMPTY_STRING);
+        builder.visibility(DocumentInfo.Visibility.API_LEVEL);
+        builder.createdTime(time);
+        builder.lastUpdatedTime(time);
+        return builder.build();
+    }
+
+    /**
+     * Creates a inline type documentation info sample with inline content null
+     *
+     * @return a inline type documentation info sample
+     */
+    public static DocumentInfo createInlineContentNullDocumentationInfo() {
+        Instant time = APIUtils.getCurrentUTCTime();
+        //created by admin
+        DocumentInfo.Builder builder = new DocumentInfo.Builder();
+        builder.id(UUID.randomUUID().toString());
+        builder.name(SAMPLE_DOC_NAME);
+        builder.type(DocumentInfo.DocType.HOWTO);
+        builder.summary("Summary of Calculator Documentation - null inline content");
+        builder.sourceType(DocumentInfo.SourceType.INLINE);
         builder.otherType(EMPTY_STRING);
         builder.visibility(DocumentInfo.Visibility.API_LEVEL);
         builder.createdTime(time);
@@ -570,7 +603,7 @@ public class SampleTestObjectCreator {
         builder.type(DocumentInfo.DocType.HOWTO);
         builder.summary("Summary of PDF Type Documentation");
         builder.sourceType(DocumentInfo.SourceType.FILE);
-        builder.sourceURL(EMPTY_STRING);
+        builder.fileName(FILE_DOC_NAME);
         builder.otherType(EMPTY_STRING);
         builder.visibility(DocumentInfo.Visibility.API_LEVEL);
         builder.createdTime(time);
@@ -606,6 +639,16 @@ public class SampleTestObjectCreator {
      */
     public static byte[] createDefaultFileDocumentationContent() throws IOException {
         return IOUtils.toByteArray(Thread.currentThread().getContextClassLoader().getResourceAsStream(PATH_FILE_DOC_1));
+    }
+
+    /**
+     * Retrieves file content byte array
+     *
+     * @return file content byte array
+     * @throws IOException If unable to read doc file resource
+     */
+    public static byte[] createAlternativeFileDocumentationContent() throws IOException {
+        return IOUtils.toByteArray(Thread.currentThread().getContextClassLoader().getResourceAsStream(PATH_FILE_DOC_2));
     }
 
     public static Application createDefaultApplication() {
@@ -1103,23 +1146,6 @@ public class SampleTestObjectCreator {
         workflow.setAttributes(properties);
 
         return workflow;
-    }
-
-    public static DocumentInfo createDefaultFileDocumentationInfo() {
-        Instant time = APIUtils.getCurrentUTCTime();
-        //created by admin
-        DocumentInfo.Builder builder = new DocumentInfo.Builder();
-        builder.id(UUID.randomUUID().toString());
-        builder.name(SAMPLE_DOC_NAME);
-        builder.type(DocumentInfo.DocType.HOWTO);
-        builder.summary("Summary of Calculator Documentation");
-        builder.sourceType(DocumentInfo.SourceType.FILE);
-        builder.sourceURL(EMPTY_STRING);
-        builder.otherType(EMPTY_STRING);
-        builder.visibility(DocumentInfo.Visibility.API_LEVEL);
-        builder.createdTime(time);
-        builder.lastUpdatedTime(time);
-        return builder.build();
     }
 
     public static Comment createDefaultComment(String apiId, String entryPoint) {

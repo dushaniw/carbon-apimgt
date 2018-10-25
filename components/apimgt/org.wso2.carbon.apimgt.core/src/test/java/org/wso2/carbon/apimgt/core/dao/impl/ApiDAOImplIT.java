@@ -1051,9 +1051,9 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         testAddGetEndpoint();
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         apiDAO.addAPI(api);
-        DocumentInfo documentInfo1 = SampleTestObjectCreator.createDefaultDocumentationInfo();
+        DocumentInfo documentInfo1 = SampleTestObjectCreator.createDefaultInlineDocumentationInfo();
         apiDAO.addDocumentInfo(api.getId(), documentInfo1);
-        DocumentInfo documentInfo2 = SampleTestObjectCreator.createDefaultDocumentationInfo();
+        DocumentInfo documentInfo2 = SampleTestObjectCreator.createDefaultInlineDocumentationInfo();
         apiDAO.addDocumentInfo(api.getId(), documentInfo2);
         List<DocumentInfo> documentInfoList = new ArrayList<>();
         documentInfoList.add(documentInfo1);
@@ -1069,7 +1069,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         testAddGetEndpoint();
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         apiDAO.addAPI(api);
-        DocumentInfo documentInfo1 = SampleTestObjectCreator.createDefaultDocumentationInfo();
+        DocumentInfo documentInfo1 = SampleTestObjectCreator.createDefaultInlineDocumentationInfo();
         apiDAO.addDocumentInfo(api.getId(), documentInfo1);
         List<DocumentInfo> documentInfoList = new ArrayList<>();
         documentInfoList.add(documentInfo1);
@@ -1080,8 +1080,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         apiDAO.addDocumentInfo(api.getId(), documentInfo);
         byte[] contentBytes = SampleTestObjectCreator.createDefaultFileDocumentationContent();
 
-        apiDAO.addDocumentFileContent(documentInfo.getId(), new ByteArrayInputStream(contentBytes), "application/pdf",
-                ADMIN);
+        apiDAO.addAPIDocumentFileContent(documentInfo.getId(), new ByteArrayInputStream(contentBytes), ADMIN);
         byte[] retrievedContentFromDB = IOUtils.toByteArray(apiDAO.getDocumentFileContent(documentInfo.getId()));
         Assert.assertEquals(contentBytes.length, retrievedContentFromDB.length);
     }
@@ -1092,24 +1091,10 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         testAddGetEndpoint();
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         apiDAO.addAPI(api);
-        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo();
+        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultInlineDocumentationInfo();
         apiDAO.addDocumentInfo(api.getId(), documentInfo);
         DocumentInfo documentInfoFromDB = apiDAO.getDocumentInfo(documentInfo.getId());
         Assert.assertEquals(documentInfo, documentInfoFromDB);
-    }
-
-    @Test(description = "Getting document inline content for an API")
-    public void testGetDocumentInlineContent() throws Exception {
-        ApiDAO apiDAO = new DAOFactory().getApiDAO();
-        testAddGetEndpoint();
-        API api = SampleTestObjectCreator.createDefaultAPI().build();
-        apiDAO.addAPI(api);
-        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo();
-        apiDAO.addDocumentInfo(api.getId(), documentInfo);
-        String inlineDocContent = SampleTestObjectCreator.createDefaultInlineDocumentationContent();
-        apiDAO.addDocumentInlineContent(documentInfo.getId(), inlineDocContent, ADMIN);
-        String inlineDocContentFromDB = apiDAO.getDocumentInlineContent(documentInfo.getId());
-        Assert.assertEquals(inlineDocContent, inlineDocContentFromDB);
     }
 
     @Test(description = "Delete documentation for an API")
@@ -1119,11 +1104,11 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         apiDAO.addAPI(api);
         //adding documentation
-        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo();
+        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultInlineDocumentationInfo();
         String docId = documentInfo.getId();
         apiDAO.addDocumentInfo(api.getId(), documentInfo);
         //delete documentation
-        apiDAO.deleteDocument(docId);
+        apiDAO.deleteAPIDocument(docId);
         DocumentInfo documentInfoFromDB = apiDAO.getDocumentInfo(docId);
         Assert.assertNull(documentInfoFromDB);
     }
@@ -1492,7 +1477,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API api = builder.build();
         testAddGetEndpoint();
         apiDAO.addAPI(api);
-        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo();
+        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultInlineDocumentationInfo();
         apiDAO.addDocumentInfo(api.getId(), documentInfo);
 
         String fingerprintBeforeUpdate = ETagUtils
@@ -1500,12 +1485,12 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNotNull(fingerprintBeforeUpdate);
         Thread.sleep(1);
 
-        DocumentInfo updateDocument = SampleTestObjectCreator.createAlternativeDocumentationInfo(documentInfo.getId());
+        DocumentInfo updateDocument = SampleTestObjectCreator
+                .createAlternativeInlineDocumentationInfo(documentInfo.getId());
         apiDAO.updateDocumentInfo(api.getId(), updateDocument, ADMIN);
         String fingerprintAfterUpdate = ETagUtils
                 .generateETag(apiDAO.getLastUpdatedTimeOfDocument(documentInfo.getId()));
         Assert.assertNotNull(fingerprintBeforeUpdate);
-
         Assert.assertNotEquals(fingerprintBeforeUpdate, fingerprintAfterUpdate);
     }
 
@@ -1516,23 +1501,28 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API api = builder.build();
         testAddGetEndpoint();
         apiDAO.addAPI(api);
-        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo();
+        DocumentInfo documentInfo = SampleTestObjectCreator.createFileDocumentationInfo();
         apiDAO.addDocumentInfo(api.getId(), documentInfo);
-        apiDAO.addDocumentInlineContent(documentInfo.getId(),
-                SampleTestObjectCreator.createDefaultInlineDocumentationContent(), ADMIN);
-
-        String fingerprintBeforeUpdate = ETagUtils
-                .generateETag(apiDAO.getLastUpdatedTimeOfDocumentContent(api.getId(), documentInfo.getId()));
-        Assert.assertNotNull(fingerprintBeforeUpdate);
+        String fingerprintBeforeFirstContentUpdate = ETagUtils
+                .generateETag(apiDAO.getLastUpdatedTimeOfDocument(documentInfo.getId()));
+        Assert.assertNotNull(fingerprintBeforeFirstContentUpdate);
         Thread.sleep(1);
 
-        apiDAO.addDocumentInlineContent(documentInfo.getId(),
-                SampleTestObjectCreator.createAlternativeInlineDocumentationContent(), ADMIN);
-        String fingerprintAfterUpdate = ETagUtils
-                .generateETag(apiDAO.getLastUpdatedTimeOfDocumentContent(api.getId(), documentInfo.getId()));
-        Assert.assertNotNull(fingerprintBeforeUpdate);
+        apiDAO.addAPIDocumentFileContent(documentInfo.getId(),
+                new ByteArrayInputStream(SampleTestObjectCreator.createDefaultFileDocumentationContent()), ADMIN);
+        String fingerprintAfterFirstContentUpdate = ETagUtils
+                .generateETag(apiDAO.getLastUpdatedTimeOfDocument(documentInfo.getId()));
+        Assert.assertNotNull(fingerprintAfterFirstContentUpdate);
+        Assert.assertNotEquals(fingerprintBeforeFirstContentUpdate, fingerprintAfterFirstContentUpdate);
+        Thread.sleep(1);
 
-        Assert.assertNotEquals(fingerprintBeforeUpdate, fingerprintAfterUpdate);
+        apiDAO.addAPIDocumentFileContent(documentInfo.getId(),
+                new ByteArrayInputStream(SampleTestObjectCreator.createAlternativeFileDocumentationContent()), ADMIN);
+        String fingerprintAfterSecondContentUpdate = ETagUtils
+                .generateETag(apiDAO.getLastUpdatedTimeOfDocument(documentInfo.getId()));
+        Assert.assertNotNull(fingerprintAfterSecondContentUpdate);
+        Assert.assertNotEquals(fingerprintAfterFirstContentUpdate, fingerprintAfterSecondContentUpdate);
+        Assert.assertNotEquals(fingerprintBeforeFirstContentUpdate, fingerprintAfterSecondContentUpdate);
     }
 
     @Test
@@ -1573,16 +1563,47 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API api = builder.build();
         testAddGetEndpoint();
         apiDAO.addAPI(api);
-        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultFileDocumentationInfo();
+        DocumentInfo documentInfo = SampleTestObjectCreator.createFileDocumentationInfo();
         Assert.assertFalse(apiDAO.isDocumentExist(api.getId(), documentInfo));
         apiDAO.addDocumentInfo(api.getId(), documentInfo);
-        apiDAO.addDocumentFileContent(documentInfo.getId(), IOUtils.toInputStream(SampleTestObjectCreator
-                .createDefaultInlineDocumentationContent()), "inline1.txt", documentInfo.getCreatedBy());
+        apiDAO.addAPIDocumentFileContent(documentInfo.getId(), new ByteArrayInputStream(SampleTestObjectCreator
+                .createDefaultFileDocumentationContent()), documentInfo.getCreatedBy());
         Assert.assertTrue(apiDAO.isDocumentExist(api.getId(), documentInfo));
         List<DocumentInfo> documentInfoList = apiDAO.getDocumentsInfoList(api.getId());
         Assert.assertEquals(documentInfoList.get(0), documentInfo);
-        apiDAO.deleteDocument(documentInfo.getId());
+        apiDAO.deleteAPIDocument(documentInfo.getId());
         Assert.assertFalse(apiDAO.isDocumentExist(api.getId(), documentInfo));
+    }
+
+
+    @Test
+    public void testDocumentInfoUpdate() throws Exception {
+        ApiDAO apiDAO = new DAOFactory().getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
+                .apiDefinition(SampleTestObjectCreator.apiDefinition);
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultInlineDocumentationInfo();
+        Assert.assertFalse(apiDAO.isDocumentExist(api.getId(), documentInfo));
+        apiDAO.addDocumentInfo(api.getId(), documentInfo);
+        Assert.assertTrue(apiDAO.isDocumentExist(api.getId(), documentInfo));
+        String fingerprintBeforeUpdate = ETagUtils.generateETag(apiDAO.getLastUpdatedTimeOfDocument(documentInfo
+                .getId()));
+        Assert.assertNotNull(fingerprintBeforeUpdate);
+        Thread.sleep(1);
+
+        DocumentInfo updateDocument = SampleTestObjectCreator
+                .createAlternativeInlineDocumentationInfo(documentInfo.getId());
+        apiDAO.updateDocumentInfo(api.getId(), updateDocument, ADMIN);
+        String fingerprintAfterUpdate = ETagUtils.generateETag(apiDAO.getLastUpdatedTimeOfDocument(documentInfo
+                .getId()));
+        Assert.assertNotNull(fingerprintAfterUpdate);
+        Assert.assertNotEquals(fingerprintBeforeUpdate, fingerprintAfterUpdate);
+
+        DocumentInfo documentFromDB = apiDAO.getDocumentInfo(documentInfo.getId());
+        Assert.assertNotEquals(documentInfo, documentFromDB);
+        Assert.assertEquals(updateDocument, documentFromDB);
     }
 
     @Test
