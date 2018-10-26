@@ -145,19 +145,37 @@ public class ApisApiServiceImplTestCase {
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
         PowerMockito.mockStatic(RestAPIPublisherUtil.class);
-        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
-                thenReturn(apiPublisher);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).thenReturn(apiPublisher);
         String api1Id = UUID.randomUUID().toString();
         String documentId = UUID.randomUUID().toString();
-        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo().build();
-        DocumentContent documentContent = DocumentContent.newDocumentContent().inlineContent(inlineContent)
-                .documentInfo(documentInfo).build();
+        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultInlineDocumentationInfo().build();
+        DocumentContent documentContent = DocumentContent.newDocumentContent().documentInfo(documentInfo).build();
         Mockito.doReturn(documentContent).doThrow(new IllegalArgumentException()).when(apiPublisher).
                 getDocumentationContent(documentId);
         Response response = apisApiService.
                 apisApiIdDocumentsDocumentIdContentGet(api1Id, documentId, null, null, getRequest());
         assertEquals(response.getStatus(), 200);
         assertEquals(inlineContent, response.getEntity().toString());
+    }
+
+    @Test
+    public void testApisApiIdDocumentsDocumentIdContentGetURL() throws Exception {
+        String URL = "https://www.testapidoc.com/docs/123.pdf";
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).thenReturn(apiPublisher);
+        String api1Id = UUID.randomUUID().toString();
+        String documentId = UUID.randomUUID().toString();
+        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultURLDocumentationInfo().content(URL).build();
+        DocumentContent documentContent = DocumentContent.newDocumentContent().documentInfo(documentInfo).build();
+        Mockito.doReturn(documentContent).doThrow(new IllegalArgumentException()).when(apiPublisher).
+                getDocumentationContent(documentId);
+        Response response = apisApiService.
+                apisApiIdDocumentsDocumentIdContentGet(api1Id, documentId, null, null, getRequest());
+        assertEquals(response.getStatus(), 303);
+        assertEquals(URL, response.getHeaderString("Location"));
     }
 
     @Test
@@ -171,7 +189,7 @@ public class ApisApiServiceImplTestCase {
                 thenReturn(apiPublisher);
         String api1Id = UUID.randomUUID().toString();
         String documentId = UUID.randomUUID().toString();
-        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo()
+        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultFileDocumentationInfo()
                 .sourceType(DocumentInfo.SourceType.FILE).fileName(fileName).build();
         DocumentContent documentContent = DocumentContent.newDocumentContent().documentInfo(documentInfo).build();
         Mockito.doReturn(documentContent).doThrow(new IllegalArgumentException()).when(apiPublisher).
@@ -192,9 +210,8 @@ public class ApisApiServiceImplTestCase {
                 thenReturn(apiPublisher);
         String api1Id = UUID.randomUUID().toString();
         String documentId = UUID.randomUUID().toString();
-        Mockito.doThrow(new APIManagementException("Error Occurred",
-                ExceptionCodes.DOCUMENT_CONTENT_NOT_FOUND)).when(apiPublisher).
-                getDocumentationContent(documentId);
+        Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.DOCUMENT_CONTENT_NOT_FOUND))
+                .when(apiPublisher).getDocumentationContent(documentId);
         Response response = apisApiService.
                 apisApiIdDocumentsDocumentIdContentGet(api1Id, documentId, null, null, getRequest());
         assertEquals(response.getStatus(), 404);
@@ -202,48 +219,19 @@ public class ApisApiServiceImplTestCase {
     }
 
     @Test
-    public void testApisApiIdDocumentsDocumentIdContentPostNotAllowed() throws Exception {
-        String inlineContent = "INLINE CONTENT";
-
-        ClassLoader classLoader = getClass().getClassLoader();
-        File file = new File(classLoader.getResource("swagger.json").getFile());
-        FileInputStream fis = null;
-        fis = new FileInputStream(file);
-        printTestMethodName();
-        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
-        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
-        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
-        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
-                thenReturn(apiPublisher);
-        String api1Id = UUID.randomUUID().toString();
-        String documentId = UUID.randomUUID().toString();
-        Mockito.doNothing().doThrow(new IllegalArgumentException()).when(apiPublisher).
-                uploadDocumentationFile(documentId, fis, "application/pdf");
-        Response response = apisApiService.
-                apisApiIdDocumentsDocumentIdContentPost(api1Id, documentId,
-                        fis, null, inlineContent, null, null, getRequest());
-        fis.close();
-        assertEquals(response.getStatus(), 400);
-        assertTrue(response.getEntity().toString().contains("Only one of 'file' and 'inlineContent' " +
-                "should be specified"));
-    }
-
-
-    @Test
     public void testApisApiIdDocumentsDocumentIdContentPostNotFound() throws Exception {
         printTestMethodName();
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
         PowerMockito.mockStatic(RestAPIPublisherUtil.class);
-        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
-                thenReturn(apiPublisher);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).thenReturn(apiPublisher);
         String api1Id = UUID.randomUUID().toString();
         String documentId = UUID.randomUUID().toString();
         Mockito.doReturn(null).doThrow(new IllegalArgumentException()).when(apiPublisher).
                 getDocumentationSummary(documentId);
         Response response = apisApiService.
                 apisApiIdDocumentsDocumentIdContentPost(api1Id, documentId,
-                        null, null, null, null, null, getRequest());
+                        null, null,null, null, getRequest());
         assertEquals(response.getStatus(), 404);
         assertTrue(response.getEntity().toString().contains("Documentation not found"));
     }
@@ -257,8 +245,7 @@ public class ApisApiServiceImplTestCase {
         FileInfo fileDetail = new FileInfo();
         fileDetail.setFileName(fileName);
         fileDetail.setContentType(contentType);
-        FileInputStream fis = null;
-        fis = new FileInputStream(file);
+        FileInputStream fis = new FileInputStream(file);
         printTestMethodName();
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
@@ -267,15 +254,15 @@ public class ApisApiServiceImplTestCase {
                 thenReturn(apiPublisher);
         String api1Id = UUID.randomUUID().toString();
         String documentId = UUID.randomUUID().toString();
-        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo().fileName(fileName)
-                .sourceType(DocumentInfo.SourceType.FILE).build();
+        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultFileDocumentationInfo().fileName(fileName)
+                .build();
         Mockito.doReturn(documentInfo).doThrow(new IllegalArgumentException()).when(apiPublisher).
                 getDocumentationSummary(documentId);
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(apiPublisher).
-                uploadDocumentationFile(documentId, fis, contentType);
+                uploadAPIDocumentationFile(documentId, fis);
         Response response = apisApiService.
-                apisApiIdDocumentsDocumentIdContentPost(api1Id, documentId,
-                        fis, fileDetail, null, null, null, getRequest());
+                apisApiIdDocumentsDocumentIdContentPost(api1Id, documentId, fis, fileDetail, null,
+                        null, getRequest());
         fis.close();
         assertEquals(response.getStatus(), 201);
     }
@@ -289,25 +276,23 @@ public class ApisApiServiceImplTestCase {
         FileInfo fileDetail = new FileInfo();
         fileDetail.setFileName(fileName);
         fileDetail.setContentType(contentType);
-        FileInputStream fis = null;
-        fis = new FileInputStream(file);
+        FileInputStream fis = new FileInputStream(file);
         printTestMethodName();
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
         PowerMockito.mockStatic(RestAPIPublisherUtil.class);
-        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
-                thenReturn(apiPublisher);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).thenReturn(apiPublisher);
         String api1Id = UUID.randomUUID().toString();
         String documentId = UUID.randomUUID().toString();
-        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo().fileName(fileName)
+        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultFileDocumentationInfo().fileName(fileName)
                 .sourceType(DocumentInfo.SourceType.INLINE).build();
-        Mockito.doReturn(documentInfo).doThrow(new IllegalArgumentException()).when(apiPublisher).
-                getDocumentationSummary(documentId);
-        Mockito.doNothing().doThrow(new IllegalArgumentException()).when(apiPublisher).
-                uploadDocumentationFile(documentId, fis, contentType);
+        Mockito.doReturn(documentInfo).doThrow(new IllegalArgumentException()).when(apiPublisher)
+                .getDocumentationSummary(documentId);
+        Mockito.doNothing().doThrow(new IllegalArgumentException()).when(apiPublisher)
+                .uploadAPIDocumentationFile(documentId, fis);
         Response response = apisApiService.
-                apisApiIdDocumentsDocumentIdContentPost(api1Id, documentId,
-                        fis, fileDetail, null, null, null, getRequest());
+                apisApiIdDocumentsDocumentIdContentPost(api1Id, documentId, fis, fileDetail, null,
+                        null, getRequest());
         fis.close();
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("is not FILE"));
@@ -315,8 +300,8 @@ public class ApisApiServiceImplTestCase {
     }
 
     @Test
-    public void testApisApiIdDocumentsDocumentIdContentPostInline() throws Exception {
-        String inlineContent = "INLINE CONTENT";
+    public void testApisApiIdDocumentsDocumentIdContentPostNullContent() throws Exception {
+        String fileName = "swagger.json";
         printTestMethodName();
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
@@ -325,71 +310,20 @@ public class ApisApiServiceImplTestCase {
                 thenReturn(apiPublisher);
         String api1Id = UUID.randomUUID().toString();
         String documentId = UUID.randomUUID().toString();
-        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo()
-                .sourceType(DocumentInfo.SourceType.INLINE).build();
+        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultFileDocumentationInfo().fileName(fileName)
+                .build();
         Mockito.doReturn(documentInfo).doThrow(new IllegalArgumentException()).when(apiPublisher).
                 getDocumentationSummary(documentId);
-        Mockito.doNothing().doThrow(new IllegalArgumentException()).when(apiPublisher).
-                addDocumentationContent(documentId, inlineContent);
         Response response = apisApiService.
-                apisApiIdDocumentsDocumentIdContentPost(api1Id, documentId,
-                        null, null, inlineContent, null, null, getRequest());
-        assertEquals(response.getStatus(), 201);
-    }
-
-    @Test
-    public void testApisApiIdDocumentsDocumentIdContentPostInlineWrongSource() throws Exception {
-        String inlineContent = "INLINE CONTENT";
-        printTestMethodName();
-        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
-        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
-        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
-        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
-                thenReturn(apiPublisher);
-        String api1Id = UUID.randomUUID().toString();
-        String documentId = UUID.randomUUID().toString();
-        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo()
-                .sourceType(DocumentInfo.SourceType.FILE).build();
-        Mockito.doReturn(documentInfo).doThrow(new IllegalArgumentException()).when(apiPublisher).
-                getDocumentationSummary(documentId);
-        Mockito.doNothing().doThrow(new IllegalArgumentException()).when(apiPublisher).
-                addDocumentationContent(documentId, inlineContent);
-        Response response = apisApiService.
-                apisApiIdDocumentsDocumentIdContentPost(api1Id, documentId,
-                        null, null, inlineContent, null, null, getRequest());
+                apisApiIdDocumentsDocumentIdContentPost(api1Id, documentId, null, null,
+                        null, null, getRequest());
         assertEquals(response.getStatus(), 400);
-        assertTrue(response.getEntity().toString().contains("is not INLINE"));
-
-    }
-
-    @Test
-    public void testApisApiIdDocumentsDocumentIdContentPostWrongSource() throws Exception {
-        String inlineContent = "INLINE CONTENT";
-        printTestMethodName();
-        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
-        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
-        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
-        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
-                thenReturn(apiPublisher);
-        String api1Id = UUID.randomUUID().toString();
-        String documentId = UUID.randomUUID().toString();
-        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo()
-                .sourceType(DocumentInfo.SourceType.OTHER).build();
-        Mockito.doReturn(documentInfo).doThrow(new IllegalArgumentException()).when(apiPublisher).
-                getDocumentationSummary(documentId);
-        Mockito.doNothing().doThrow(new IllegalArgumentException()).when(apiPublisher).
-                addDocumentationContent(documentId, inlineContent);
-        Response response = apisApiService.
-                apisApiIdDocumentsDocumentIdContentPost(api1Id, documentId,
-                        null, null, null, null, null, getRequest());
-        assertEquals(response.getStatus(), 400);
-        assertTrue(response.getEntity().toString().contains("Either 'file' or 'inlineContent' should be specified"));
+        assertTrue(response.getEntity().toString().contains("The 'file' content should be specified"));
 
     }
 
     @Test
     public void testApisApiIdDocumentsDocumentIdContentPostAPIManagementException() throws Exception {
-        String inlineContent = "INLINE CONTENT";
         printTestMethodName();
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
@@ -402,7 +336,7 @@ public class ApisApiServiceImplTestCase {
                 .when(apiPublisher).getDocumentationSummary(documentId);
         Response response = apisApiService.
                 apisApiIdDocumentsDocumentIdContentPost(api1Id, documentId,
-                        null, null, null, null, null, getRequest());
+                        null, null, null, null, getRequest());
         assertEquals(response.getStatus(), 404);
         assertTrue(response.getEntity().toString().contains("Document content not found"));
     }
@@ -413,13 +347,13 @@ public class ApisApiServiceImplTestCase {
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
         PowerMockito.mockStatic(RestAPIPublisherUtil.class);
-        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
-                thenReturn(apiPublisher);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).thenReturn(apiPublisher);
         String documentId = UUID.randomUUID().toString();
         String apiId = UUID.randomUUID().toString();
-        Mockito.doNothing().doThrow(new IllegalArgumentException()).when(apiPublisher).removeDocumentation(documentId);
-        Response response = apisApiService.apisApiIdDocumentsDocumentIdDelete(apiId,
-                documentId, null, null, getRequest());
+        Mockito.doNothing().doThrow(new IllegalArgumentException()).when(apiPublisher)
+                .removeAPIDocumentation(documentId);
+        Response response = apisApiService.apisApiIdDocumentsDocumentIdDelete(apiId, documentId, null,
+                null, getRequest());
         assertEquals(response.getStatus(), 200);
     }
 
@@ -429,35 +363,77 @@ public class ApisApiServiceImplTestCase {
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
         PowerMockito.mockStatic(RestAPIPublisherUtil.class);
-        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
-                thenReturn(apiPublisher);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).thenReturn(apiPublisher);
         String documentId = UUID.randomUUID().toString();
         String apiId = UUID.randomUUID().toString();
         Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.DOCUMENT_NOT_FOUND))
-                .when(apiPublisher).removeDocumentation(documentId);
-        Response response = apisApiService.apisApiIdDocumentsDocumentIdDelete(apiId, documentId,
-                null, null, getRequest());
+                .when(apiPublisher).removeAPIDocumentation(documentId);
+        Response response = apisApiService.apisApiIdDocumentsDocumentIdDelete(apiId, documentId, null,
+                null, getRequest());
         assertEquals(response.getStatus(), 404);
         assertTrue(response.getEntity().toString().contains("Document not found"));
     }
 
     @Test
-    public void testApisApiIdDocumentsDocumentIdGet() throws Exception {
+    public void testApisApiIdDocumentsDocumentIdGetURLDocument() throws Exception {
+        String URL = "https://www.apidoc.com/docs/123.pdf";
         printTestMethodName();
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
         PowerMockito.mockStatic(RestAPIPublisherUtil.class);
-        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
-                thenReturn(apiPublisher);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).thenReturn(apiPublisher);
         String documentId = UUID.randomUUID().toString();
         String apiId = UUID.randomUUID().toString();
-        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo().build();
-        Mockito.doReturn(documentInfo).doThrow(new IllegalArgumentException())
-                .when(apiPublisher).getDocumentationSummary(documentId);
-        Response response = apisApiService.apisApiIdDocumentsDocumentIdGet(apiId, documentId,
-                null, null, getRequest());
+        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultURLDocumentationInfo().content(URL).build();
+        Mockito.doReturn(documentInfo).doThrow(new IllegalArgumentException()).when(apiPublisher)
+                .getDocumentationSummary(documentId);
+        Response response = apisApiService.apisApiIdDocumentsDocumentIdGet(apiId, documentId, null,
+                null, getRequest());
         assertEquals(response.getStatus(), 200);
-        assertTrue(response.getEntity().toString().contains("Summary of Calculator Documentation"));
+        assertTrue(response.getEntity().toString().contains("Summary of Calculator URL Documentation"));
+        assertTrue(response.getEntity().toString().contains("https://www.apidoc.com/docs/123.pdf"));
+    }
+
+    @Test
+    public void testApisApiIdDocumentsDocumentIdGetInlineDocument() throws Exception {
+        String inlineText = "INLINE TEXT";
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).thenReturn(apiPublisher);
+        String documentId = UUID.randomUUID().toString();
+        String apiId = UUID.randomUUID().toString();
+        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultInlineDocumentationInfo().content(inlineText)
+                .build();
+        Mockito.doReturn(documentInfo).doThrow(new IllegalArgumentException()).when(apiPublisher)
+                .getDocumentationSummary(documentId);
+        Response response = apisApiService.apisApiIdDocumentsDocumentIdGet(apiId, documentId, null,
+                null, getRequest());
+        assertEquals(response.getStatus(), 200);
+        assertTrue(response.getEntity().toString().contains("Summary of Calculator Inline Documentation"));
+        assertTrue(response.getEntity().toString().contains("INLINE TEXT"));
+    }
+
+    @Test
+    public void testApisApiIdDocumentsDocumentIdGetFileDocument() throws Exception {
+        String fileName = "swagger.json";
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).thenReturn(apiPublisher);
+        String documentId = UUID.randomUUID().toString();
+        String apiId = UUID.randomUUID().toString();
+        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultFileDocumentationInfo().fileName(fileName)
+                .build();
+        Mockito.doReturn(documentInfo).doThrow(new IllegalArgumentException()).when(apiPublisher)
+                .getDocumentationSummary(documentId);
+        Response response = apisApiService.apisApiIdDocumentsDocumentIdGet(apiId, documentId, null,
+                null, getRequest());
+        assertEquals(response.getStatus(), 200);
+        assertTrue(response.getEntity().toString().contains("Summary of Calculator File Documentation"));
+        assertTrue(response.getEntity().toString().contains("swagger.json"));
     }
 
     @Test
@@ -470,12 +446,12 @@ public class ApisApiServiceImplTestCase {
                 thenReturn(apiPublisher);
         String documentId = UUID.randomUUID().toString();
         String apiId = UUID.randomUUID().toString();
-        Mockito.doReturn(null).doThrow(new IllegalArgumentException())
-                .when(apiPublisher).getDocumentationSummary(documentId);
-        Response response = apisApiService.apisApiIdDocumentsDocumentIdGet(apiId, documentId,
-                null, null, getRequest());
+        Mockito.doReturn(null).doThrow(new IllegalArgumentException()).when(apiPublisher)
+                .getDocumentationSummary(documentId);
+        Response response = apisApiService.apisApiIdDocumentsDocumentIdGet(apiId, documentId, null,
+                null, getRequest());
         assertEquals(response.getStatus(), 404);
-        assertTrue(response.getEntity().toString().contains("Documntation not found"));
+        assertTrue(response.getEntity().toString().contains("Documentation not found"));
     }
 
     @Test
@@ -501,7 +477,7 @@ public class ApisApiServiceImplTestCase {
         printTestMethodName();
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
-        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo().build();
+        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultInlineDocumentationInfo().build();
         DocumentDTO documentDTO = MappingUtil.toDocumentDTO(documentInfo);
         PowerMockito.mockStatic(RestAPIPublisherUtil.class);
         PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
@@ -521,7 +497,7 @@ public class ApisApiServiceImplTestCase {
         printTestMethodName();
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
-        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo().otherType("")
+        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultInlineDocumentationInfo().otherType("")
                 .type(DocumentInfo.DocType.OTHER).build();
         DocumentDTO documentDTO = MappingUtil.toDocumentDTO(documentInfo);
         PowerMockito.mockStatic(RestAPIPublisherUtil.class);
@@ -542,16 +518,14 @@ public class ApisApiServiceImplTestCase {
         printTestMethodName();
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
-        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo()
-                .sourceType(DocumentInfo.SourceType.URL).build();
+        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultURLDocumentationInfo().build();
         DocumentDTO documentDTO = MappingUtil.toDocumentDTO(documentInfo);
         PowerMockito.mockStatic(RestAPIPublisherUtil.class);
-        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
-                thenReturn(apiPublisher);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).thenReturn(apiPublisher);
         String documentId = UUID.randomUUID().toString();
         String apiId = UUID.randomUUID().toString();
-        Mockito.doReturn(documentInfo).doThrow(new IllegalArgumentException())
-                .when(apiPublisher).getDocumentationSummary(documentId);
+        Mockito.doReturn(documentInfo).doThrow(new IllegalArgumentException()).when(apiPublisher)
+                .getDocumentationSummary(documentId);
         Response response = apisApiService.apisApiIdDocumentsDocumentIdPut(apiId, documentId,
                 documentDTO, null, null, getRequest());
         assertEquals(response.getStatus(), 400);
@@ -563,13 +537,12 @@ public class ApisApiServiceImplTestCase {
         printTestMethodName();
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
-        DocumentInfo documentInfo1 = SampleTestObjectCreator.createDefaultDocumentationInfo().build();
-        DocumentInfo documentInfo2 = SampleTestObjectCreator.createDefaultDocumentationInfo().id(documentInfo1.getId())
-                .summary("My new summary").build();
+        DocumentInfo documentInfo1 = SampleTestObjectCreator.createDefaultInlineDocumentationInfo().build();
+        DocumentInfo documentInfo2 = SampleTestObjectCreator.createDefaultInlineDocumentationInfo()
+                .id(documentInfo1.getId()).summary("My new summary").build();
         DocumentDTO documentDTO = MappingUtil.toDocumentDTO(documentInfo2);
         PowerMockito.mockStatic(RestAPIPublisherUtil.class);
-        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
-                thenReturn(apiPublisher);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).thenReturn(apiPublisher);
         String documentId = UUID.randomUUID().toString();
         String apiId = UUID.randomUUID().toString();
         Mockito.doReturn(documentInfo1).doReturn(documentInfo2).doThrow(new IllegalArgumentException())
@@ -587,13 +560,12 @@ public class ApisApiServiceImplTestCase {
         printTestMethodName();
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
-        DocumentInfo documentInfo1 = SampleTestObjectCreator.createDefaultDocumentationInfo().build();
-        DocumentInfo documentInfo2 = SampleTestObjectCreator.createDefaultDocumentationInfo().id(documentInfo1.getId())
-                .summary("My new summary").build();
+        DocumentInfo documentInfo1 = SampleTestObjectCreator.createDefaultInlineDocumentationInfo().build();
+        DocumentInfo documentInfo2 = SampleTestObjectCreator.createDefaultInlineDocumentationInfo()
+                .id(documentInfo1.getId()).summary("My new summary").build();
         DocumentDTO documentDTO = MappingUtil.toDocumentDTO(documentInfo2);
         PowerMockito.mockStatic(RestAPIPublisherUtil.class);
-        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
-                thenReturn(apiPublisher);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).thenReturn(apiPublisher);
         String documentId = UUID.randomUUID().toString();
         String apiId = UUID.randomUUID().toString();
         Mockito.doReturn(documentInfo1).doReturn(documentInfo2).doThrow(new IllegalArgumentException())
@@ -618,12 +590,12 @@ public class ApisApiServiceImplTestCase {
                 thenReturn(apiPublisher);
         String apiId = UUID.randomUUID().toString();
         List<DocumentInfo> documentInfos = new ArrayList<>();
-        documentInfos.add(SampleTestObjectCreator.createDefaultDocumentationInfo().name("NewName1").build());
-        documentInfos.add(SampleTestObjectCreator.createDefaultDocumentationInfo().name("NewName2").build());
-        Mockito.doReturn(documentInfos).doThrow(new IllegalArgumentException())
-                .when(apiPublisher).getAllDocumentation(apiId, offset, limit);
-        Response response = apisApiService.apisApiIdDocumentsGet(apiId, 10,
-                0, null, getRequest());
+        documentInfos.add(SampleTestObjectCreator.createDefaultInlineDocumentationInfo().name("NewName1").build());
+        documentInfos.add(SampleTestObjectCreator.createDefaultInlineDocumentationInfo().name("NewName2").build());
+        Mockito.doReturn(documentInfos).doThrow(new IllegalArgumentException()).when(apiPublisher)
+                .getAllDocumentation(apiId, offset, limit);
+        Response response = apisApiService.apisApiIdDocumentsGet(apiId, 10, 0, null,
+                getRequest());
         assertEquals(response.getStatus(), 200);
         assertTrue(response.getEntity().toString().contains("NewName1"));
     }
@@ -634,13 +606,11 @@ public class ApisApiServiceImplTestCase {
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
         PowerMockito.mockStatic(RestAPIPublisherUtil.class);
-        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
-                thenReturn(apiPublisher);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).thenReturn(apiPublisher);
         String apiId = UUID.randomUUID().toString();
         Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.INVALID_DOCUMENT_CONTENT_DATA))
                 .when(apiPublisher).getAllDocumentation(apiId, 0, 10);
-        Response response = apisApiService.apisApiIdDocumentsGet(apiId, 10,
-                0, null, getRequest());
+        Response response = apisApiService.apisApiIdDocumentsGet(apiId, 10, 0, null, getRequest());
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("Invalid document content data provided"));
     }
@@ -651,10 +621,9 @@ public class ApisApiServiceImplTestCase {
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
         PowerMockito.mockStatic(RestAPIPublisherUtil.class);
-        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
-                thenReturn(apiPublisher);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).thenReturn(apiPublisher);
         String apiId = UUID.randomUUID().toString();
-        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo()
+        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultURLDocumentationInfo()
                 .type(DocumentInfo.DocType.OTHER).otherType("").build();
         DocumentDTO documentDTO = MappingUtil.toDocumentDTO(documentInfo);
         Response response = apisApiService.apisApiIdDocumentsPost(apiId, documentDTO,
@@ -662,7 +631,7 @@ public class ApisApiServiceImplTestCase {
     }
 
     @Test(expected = BadRequestException.class)
-    public void testApisApiIdDocumentsPostEmptySourceUrlType() throws Exception {
+    public void testApisApiIdDocumentsPostEmptyContentUrlType() throws Exception {
         printTestMethodName();
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
@@ -670,11 +639,11 @@ public class ApisApiServiceImplTestCase {
         PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
                 thenReturn(apiPublisher);
         String apiId = UUID.randomUUID().toString();
-        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo()
-                .sourceType(DocumentInfo.SourceType.URL).sourceURL("").build();
+        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultURLDocumentationInfo()
+                .sourceType(DocumentInfo.SourceType.URL).content("").build();
         DocumentDTO documentDTO = MappingUtil.toDocumentDTO(documentInfo);
-        Response response = apisApiService.apisApiIdDocumentsPost(apiId, documentDTO,
-                null, null, getRequest());
+        Response response = apisApiService.apisApiIdDocumentsPost(apiId, documentDTO, null, null,
+                getRequest());
     }
 
     @Test
@@ -686,17 +655,15 @@ public class ApisApiServiceImplTestCase {
         PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
                 thenReturn(apiPublisher);
         String apiId = UUID.randomUUID().toString();
-        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo()
+        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultInlineDocumentationInfo()
                 .sourceType(DocumentInfo.SourceType.INLINE).build();
         DocumentDTO documentDTO = MappingUtil.toDocumentDTO(documentInfo);
         Mockito.doReturn(documentDTO.getDocumentId()).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).addDocumentationInfo(apiId, documentInfo);
         Mockito.doReturn(documentInfo).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).getDocumentationSummary(documentDTO.getDocumentId());
-        Mockito.doNothing().doThrow(new IllegalArgumentException())
-                .when(apiPublisher).addDocumentationContent(documentDTO.getDocumentId(), "");
-        Response response = apisApiService.apisApiIdDocumentsPost(apiId, documentDTO,
-                null, null, getRequest());
+        Response response = apisApiService.apisApiIdDocumentsPost(apiId, documentDTO, null, null,
+                getRequest());
         assertEquals(response.getStatus(), 201);
         assertTrue(response.getEntity().toString().contains(documentDTO.getDocumentId()));
     }
@@ -710,7 +677,7 @@ public class ApisApiServiceImplTestCase {
         PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
                 thenReturn(apiPublisher);
         String apiId = UUID.randomUUID().toString();
-        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo()
+        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultInlineDocumentationInfo()
                 .sourceType(DocumentInfo.SourceType.INLINE).build();
         DocumentDTO documentDTO = MappingUtil.toDocumentDTO(documentInfo);
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.INVALID_DOCUMENT_CONTENT_DATA))

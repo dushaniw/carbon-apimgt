@@ -243,7 +243,7 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#addAPIDocumentFileContent(String docID, InputStream content, String updatedBy
+     * @see ApiDAO#addAPIDocumentFileContent(String docID, InputStream content, String updatedBy)
      */
     @Override
     public void addAPIDocumentFileContent(String docID, InputStream content, String updatedBy) throws

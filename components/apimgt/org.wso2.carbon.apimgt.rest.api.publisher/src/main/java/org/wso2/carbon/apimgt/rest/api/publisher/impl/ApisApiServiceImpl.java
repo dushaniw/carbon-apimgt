@@ -324,62 +324,62 @@ public class ApisApiServiceImpl extends ApisApiService {
     /**
      * Retrive Dedicated Gateway of an API
      *
-     * @param apiId             UUID of API
-     * @param ifNoneMatch           If-None-Match header value
+     * @param apiId           UUID of API
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
-     * @param request           msf4j request object
+     * @param request         msf4j request object
      * @return 200 OK if the opration was successful
      * @throws NotFoundException when the particular resource does not exist
      */
     @Override
     public Response apisApiIdDedicatedGatewayGet(String apiId, String ifNoneMatch, String ifModifiedSince,
-                                                  Request request) throws NotFoundException {
-            String username = RestApiUtil.getLoggedInUsername(request);
-            try {
-                APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+                                                 Request request) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername(request);
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
 
-                if (!apiPublisher.isAPIExists(apiId)) {
-                    String errorMessage = "API not found : " + apiId;
-                    APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
-                            ExceptionCodes.API_NOT_FOUND);
-                    HashMap<String, String> paramList = new HashMap<String, String>();
-                    paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
-                    ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
-                    log.error(errorMessage, e);
-                    return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-                }
-
-                String existingFingerprint = apisApiIdGetFingerprint(apiId, null, null, request);
-                if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
-                        .contains(existingFingerprint)) {
-                    return Response.notModified().build();
-                }
-
-                DedicatedGateway dedicatedGateway  = apiPublisher.getDedicatedGateway(apiId);
-                if (dedicatedGateway != null) {
-                    DedicatedGatewayDTO dedicatedGatewayDTO = MappingUtil.toDedicatedGatewayDTO(dedicatedGateway);
-                    return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint
-                            + "\"").entity(dedicatedGatewayDTO).build();
-
-                } else {
-                    String msg = "Dedicated Gateway not found for " + apiId;
-                    APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(msg,
-                            ExceptionCodes.DEDICATED_GATEWAY_DETAILS_NOT_FOUND);
-                    HashMap<String, String> paramList = new HashMap<String, String>();
-                    paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
-                    ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
-                    APIUtils.logDebug(msg, log);
-                    return Response.status(Response.Status.NOT_FOUND).entity(errorDTO).build();
-                }
-
-            } catch (APIManagementException e) {
-                String errorMessage = "Error while retrieving dedicated gateway of the API : " + apiId;
+            if (!apiPublisher.isAPIExists(apiId)) {
+                String errorMessage = "API not found : " + apiId;
+                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
+                        ExceptionCodes.API_NOT_FOUND);
                 HashMap<String, String> paramList = new HashMap<String, String>();
                 paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
                 log.error(errorMessage, e);
                 return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
             }
+
+            String existingFingerprint = apisApiIdGetFingerprint(apiId, null, null, request);
+            if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
+                    .contains(existingFingerprint)) {
+                return Response.notModified().build();
+            }
+
+            DedicatedGateway dedicatedGateway = apiPublisher.getDedicatedGateway(apiId);
+            if (dedicatedGateway != null) {
+                DedicatedGatewayDTO dedicatedGatewayDTO = MappingUtil.toDedicatedGatewayDTO(dedicatedGateway);
+                return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint
+                        + "\"").entity(dedicatedGatewayDTO).build();
+
+            } else {
+                String msg = "Dedicated Gateway not found for " + apiId;
+                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(msg,
+                        ExceptionCodes.DEDICATED_GATEWAY_DETAILS_NOT_FOUND);
+                HashMap<String, String> paramList = new HashMap<String, String>();
+                paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                APIUtils.logDebug(msg, log);
+                return Response.status(Response.Status.NOT_FOUND).entity(errorDTO).build();
+            }
+
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving dedicated gateway of the API : " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
     }
 
     /**
@@ -395,7 +395,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdDedicatedGatewayPut(String apiId, DedicatedGatewayDTO body, String ifMatch,
-                                                  String ifUnmodifiedSince, Request request) throws NotFoundException {
+                                                 String ifUnmodifiedSince, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
 
         try {
@@ -549,7 +549,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisApiIdDocumentsDocumentIdContentPost(String apiId, String documentId, InputStream fileInputStream,
                                                             FileInfo fileDetail, String ifMatch,
                                                             String ifUnmodifiedSince, Request request)
-                                                            throws NotFoundException {
+            throws NotFoundException {
         try {
             String username = RestApiUtil.getLoggedInUsername(request);
             APIPublisher apiProvider = RestAPIPublisherUtil.getApiPublisher(username);
@@ -753,24 +753,50 @@ public class ApisApiServiceImpl extends ApisApiService {
                 log.error(msg);
                 return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
             }
-            if (body.getSourceType() == DocumentDTO.SourceTypeEnum.URL &&
-                    (StringUtils.isBlank(body.getContent()) || !RestApiUtil.isURL(body.getContent()))) {
-                //check content is not null and in correct URL format if sourceType is URL
-                String msg = "Invalid document source URL Format";
-                log.error(msg);
-                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900313L, msg);
-                log.error(msg);
-                return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+            if (body.getSourceType() == DocumentDTO.SourceTypeEnum.URL) {
+                if (StringUtils.isBlank(body.getContent()) || !RestApiUtil.isURL(body.getContent())) {
+                    //check content is not null and in correct URL format if sourceType is URL
+                    String msg = "Invalid document source URL Format";
+                    log.error(msg);
+                    ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900313L, msg);
+                    log.error(msg);
+                    return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+                } else if (!StringUtils.isBlank(body.getFileName())) {
+                    //check file name is null if sourcetype is URL
+                    String msg = "File name should be empty when source type is URL";
+                    log.error(msg);
+                    ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900313L, msg);
+                    log.error(msg);
+                    return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+                }
             }
-            if (body.getSourceType() == DocumentDTO.SourceTypeEnum.INLINE && StringUtils.isBlank(body.getContent())){
-                //check content is not null if sourceType is INLINE
-                String msg = "Document inline content cannot be empty";
-                log.error(msg);
-                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900313L, msg);
-                log.error(msg);
-                return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+            if (body.getSourceType() == DocumentDTO.SourceTypeEnum.INLINE) {
+                if (StringUtils.isBlank(body.getContent())) {
+                    //check content is not null if sourceType is INLINE
+                    String msg = "Document inline content cannot be empty";
+                    log.error(msg);
+                    ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900313L, msg);
+                    log.error(msg);
+                    return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+                } else if (!StringUtils.isBlank(body.getFileName())) {
+                    //check file name is null if sourcetype is INLINE
+                    String msg = "File name should be empty when source type is INLINE";
+                    log.error(msg);
+                    ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900313L, msg);
+                    log.error(msg);
+                    return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+                }
             }
-
+            if (body.getSourceType() == DocumentDTO.SourceTypeEnum.FILE) {
+                if (!StringUtils.isBlank(body.getContent())) {
+                    //check content is null if sourcetype is FILE
+                    RestApiUtil.handleBadRequest("File type document cannot have URL or inline content. Upload " +
+                            "file content seperately", log);
+                } else if (StringUtils.isBlank(body.getFileName())) {
+                    //check file name is not null if sourcetype is FILE
+                    RestApiUtil.handleBadRequest("File name cannot be empty when source type is FILE", log);
+                }
+            }
             //overriding some properties
             body.setName(documentInfoOld.getName());
             body.setDocumentId(documentInfoOld.getId());
@@ -850,19 +876,35 @@ public class ApisApiServiceImpl extends ApisApiService {
                 RestApiUtil.handleBadRequest("otherTypeName cannot be empty if type is OTHER.", log);
             }
             String content = body.getContent();
-            if(body.getSourceType() == DocumentDTO.SourceTypeEnum.FILE && (!StringUtils.isBlank(content))){
-                //check content is null if sourcetype is FILE
-                RestApiUtil.handleBadRequest("File type document cannot have URL or inline content. Upload file " +
-                        "content seperately", log);
+            String fileName = body.getFileName();
+            if (body.getSourceType() == DocumentDTO.SourceTypeEnum.FILE) {
+                if (!StringUtils.isBlank(content)) {
+                    //check content is null if sourcetype is FILE
+                    RestApiUtil.handleBadRequest("File type document cannot have URL or inline content. Upload " +
+                            "file content seperately", log);
+                } else if (StringUtils.isBlank(fileName)) {
+                    //check file name is not null if sourcetype is FILE
+                    RestApiUtil.handleBadRequest("File name cannot be empty when source type is FILE", log);
+                }
             }
-            if (body.getSourceType() == DocumentDTO.SourceTypeEnum.URL &&
-                    (StringUtils.isBlank(content) || !RestApiUtil.isURL(content))) {
-                //check content is not null and in correct URL format if sourcetype is URL
-                RestApiUtil.handleBadRequest("Invalid document source Url Format", log);
+            if (body.getSourceType() == DocumentDTO.SourceTypeEnum.URL) {
+                if (StringUtils.isBlank(content) || !RestApiUtil.isURL(content)) {
+                    //check content is not null and in correct URL format if sourcetype is URL
+                    RestApiUtil.handleBadRequest("Invalid document source Url Format", log);
+                } else if (!StringUtils.isBlank(fileName)) {
+                    //check file name is null if sourcetype is URL
+                    RestApiUtil.handleBadRequest("File Name should be empty when source type is URL.", log);
+                }
             }
-            if (body.getSourceType() == DocumentDTO.SourceTypeEnum.INLINE && StringUtils.isBlank(content)){
-                //check content is not null if sourceType is INLINE
-                  RestApiUtil.handleBadRequest("Document inline content cannot be empty", log);
+            if (body.getSourceType() == DocumentDTO.SourceTypeEnum.INLINE) {
+                if (StringUtils.isBlank(content)) {
+                    //check content is not null if sourceType is INLINE
+                    RestApiUtil.handleBadRequest("Document inline content cannot be empty when source type is " +
+                            "INLINE", log);
+                } else if (!StringUtils.isBlank(fileName)) {
+                    //check file name is null if sourcetype is INLINE
+                    RestApiUtil.handleBadRequest("File Name should be empty when source type is INLINE.", log);
+                }
             }
             //this will fail if user does not have access to the API or the API does not exist
             String docid = apiProvider.addDocumentationInfo(apiId, documentation);
@@ -870,7 +912,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             DocumentDTO newDocumentDTO = MappingUtil.toDocumentDTO(documentation);
             return Response.status(Response.Status.CREATED).entity(newDocumentDTO).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while create  document for api " + apiId;
+            String errorMessage = "Error while create document for api " + apiId;
             HashMap<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
@@ -1249,7 +1291,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
             KeyMgtConfigurations keyManagerConfiguration = APIMConfigurationService.getInstance()
                     .getApimConfigurations().getKeyManagerConfigs();
-            Map<String,String> scopes = new APIDefinitionFromSwagger20().getScopesFromSecurityDefinition(apiDefinition);
+            Map<String, String> scopes = new APIDefinitionFromSwagger20().getScopesFromSecurityDefinition(apiDefinition);
             for (String scopeName : scopes.keySet()) {
                 if (scopeName.contains(keyManagerConfiguration.getProductRestApiScopesKeyWord())) {
                     String message = "scope name couldn't have the restricted keyword " + keyManagerConfiguration
@@ -1274,9 +1316,10 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Delete a threat protection policy from an API
-     * @param apiId APIID
+     *
+     * @param apiId    APIID
      * @param policyId Threat protection policy id
-     * @param request MSF4J Request
+     * @param request  MSF4J Request
      * @return HTTP status 200 if success, 500 otherwise
      * @throws NotFoundException When the particular resource does not exist in the system
      */
@@ -1301,7 +1344,8 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Get all threat protection policies associated with an API
-     * @param apiId APIID
+     *
+     * @param apiId   APIID
      * @param request MSF4J Request
      * @return List of threat protection policy ids
      * @throws NotFoundException When the particular resource does not exist in the system
@@ -1313,7 +1357,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             List<ThreatProtectionPolicy> policyList = apiPublisher.getThreatProtectionPolicies();
             List<ThreatProtectionPolicyDTO> dtoList = new ArrayList<>();
-            for(ThreatProtectionPolicy policy: policyList) {
+            for (ThreatProtectionPolicy policy : policyList) {
                 dtoList.add(MappingUtil.toThreatProtectionPolicyDTO(policy));
             }
             return Response.ok().entity(dtoList).build();
@@ -1325,9 +1369,10 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Add a threat protection policy to an API
-     * @param apiId APIID
+     *
+     * @param apiId    APIID
      * @param policyId Threat protection policy id
-     * @param request MSF4J Request
+     * @param request  MSF4J Request
      * @return HTTP status 200 if success, 500 otherwise
      * @throws NotFoundException When the particular resource does not exist in the system
      */
@@ -1469,7 +1514,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifModifiedSince If-Modified-Since header value
      * @param request         msf4j request
      * @return WSDL archive/file content
-     * @throws NotFoundException  When the particular resource does not exist in the system
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdWsdlGet(String apiId, String ifNoneMatch, String ifModifiedSince,
@@ -1523,7 +1568,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param request           msf4j request
      * @return 200 OK if upadating was successful.
-     * @throws NotFoundException  When the particular resource does not exist in the system
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdWsdlPut(String apiId, InputStream fileInputStream, FileInfo fileDetail,
@@ -1667,7 +1712,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisGet(Integer limit, Integer offset, String query, String ifNoneMatch, Boolean expand,
-            Request request)
+                            Request request)
             throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         APIListDTO apiListDTO = null;
@@ -1904,7 +1949,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param url             URL of the definition
      * @param request         msf4j request
      * @return API definition validation information
-     * @throws NotFoundException  When the particular resource does not exist in the system
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisValidateDefinitionPost(String type, InputStream fileInputStream, FileInfo fileDetail,
@@ -2043,7 +2088,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            Map<String,String> scopeSet = apiPublisher.getScopesForApi(apiId);
+            Map<String, String> scopeSet = apiPublisher.getScopesForApi(apiId);
             ScopeListDTO scopeListDTO = MappingUtil.toScopeListDto(scopeSet);
             return Response.ok().entity(scopeListDTO).build();
         } catch (APIManagementException e) {

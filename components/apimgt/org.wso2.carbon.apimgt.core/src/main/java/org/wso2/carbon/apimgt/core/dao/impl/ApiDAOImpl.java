@@ -2020,7 +2020,7 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     public void addAPIDocumentFileContent(String docID, InputStream content, String updatedBy) throws
             APIMgtDAOException {
-        try (Connection connection = DAOUtil.getConnection()){
+        try (Connection connection = DAOUtil.getConnection()) {
             try {
                 connection.setAutoCommit(false);
                 if (ApiDocDAO.updateBinaryDocContent(connection, docID, content, updatedBy) == 0) {

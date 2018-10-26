@@ -112,28 +112,28 @@ public class SampleTestObjectCreator {
     private static final String ALT_GTW_CONFIG_PATH = "api/alternativeGatewayConfig.bal";
     private static final String PATH_THUMBNAIL_IMG_1 = "api/thumbnail1.jpg";
     private static final String PATH_THUMBNAIL_IMG_2 = "api/thumbnail2.jpg";
-    private static final String PATH_INLINE_DOC_1 = "document/inline1.txt";
-    private static final String PATH_INLINE_DOC_2 = "document/inline2.txt";
+    private static final String PATH_INLINE_DOC_1 = "inline1.txt";
+    private static final String PATH_FILE_DOC_1 = "api1_doc2.pdf";
     private static final String SAMPLE_IP_1 = "12.32.45.3";
     private static final String SAMPLE_IP_2 = "24.34.1.45";
     private static final String SAMPLE_CUSTOM_RULE = "Sample Custom Rule";
     public static final String ADMIN_ROLE_ID = "cfbde56e-4352-498e-b6dc-85a6f1f8b058";
     public static final String DEVELOPER_ROLE_ID = "cfdce56e-8434-498e-b6dc-85a6f2d8f035";
-    public static  APIPolicy unlimitedApiPolicy = new APIPolicy(UUID.randomUUID().toString(), UNLIMITED_TIER);
-    public static  APIPolicy goldApiPolicy = new APIPolicy(UUID.randomUUID().toString(), GOLD_TIER);
-    public static  APIPolicy silverApiPolicy = new APIPolicy(UUID.randomUUID().toString(), SILVER_TIER);
-    public static  APIPolicy bronzeApiPolicy = new APIPolicy(UUID.randomUUID().toString(), BRONZE_TIER);
-    public static  SubscriptionPolicy unlimitedSubscriptionPolicy =
+    public static APIPolicy unlimitedApiPolicy = new APIPolicy(UUID.randomUUID().toString(), UNLIMITED_TIER);
+    public static APIPolicy goldApiPolicy = new APIPolicy(UUID.randomUUID().toString(), GOLD_TIER);
+    public static APIPolicy silverApiPolicy = new APIPolicy(UUID.randomUUID().toString(), SILVER_TIER);
+    public static APIPolicy bronzeApiPolicy = new APIPolicy(UUID.randomUUID().toString(), BRONZE_TIER);
+    public static SubscriptionPolicy unlimitedSubscriptionPolicy =
             new SubscriptionPolicy(UUID.randomUUID().toString(), UNLIMITED_TIER);
-    public static  SubscriptionPolicy goldSubscriptionPolicy =
+    public static SubscriptionPolicy goldSubscriptionPolicy =
             new SubscriptionPolicy(UUID.randomUUID().toString(), GOLD_TIER);
-    public static  SubscriptionPolicy silverSubscriptionPolicy =
+    public static SubscriptionPolicy silverSubscriptionPolicy =
             new SubscriptionPolicy(UUID.randomUUID().toString(), SILVER_TIER);
-    public static  SubscriptionPolicy bronzeSubscriptionPolicy =
+    public static SubscriptionPolicy bronzeSubscriptionPolicy =
             new SubscriptionPolicy(UUID.randomUUID().toString(), BRONZE_TIER);
-    public static  ApplicationPolicy fiftyPerMinApplicationPolicy =
+    public static ApplicationPolicy fiftyPerMinApplicationPolicy =
             new ApplicationPolicy(UUID.randomUUID().toString(), FIFTY_PER_MIN_TIER);
-    public static  ApplicationPolicy twentyPerMinApplicationPolicy =
+    public static ApplicationPolicy twentyPerMinApplicationPolicy =
             new ApplicationPolicy(UUID.randomUUID().toString(), TWENTY_PER_MIN_TIER);
     public static String apiDefinition;
     public static InputStream inputStream;
@@ -254,15 +254,15 @@ public class SampleTestObjectCreator {
                 .type("http").applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT);
     }
 
-    public static DocumentInfo.Builder createDefaultDocumentationInfo() {
+    public static DocumentInfo.Builder createDefaultInlineDocumentationInfo() throws IOException {
         //created by admin
         DocumentInfo.Builder builder = new DocumentInfo.Builder();
         builder.id(UUID.randomUUID().toString());
         builder.name(SAMPLE_DOC_NAME);
         builder.type(DocumentInfo.DocType.HOWTO);
-        builder.summary("Summary of Calculator Documentation");
+        builder.summary("Summary of Calculator Inline Documentation");
         builder.sourceType(DocumentInfo.SourceType.INLINE);
-        builder.sourceURL(EMPTY_STRING);
+        builder.content(createDefaultInlineDocumentationContent());
         builder.otherType(EMPTY_STRING);
         builder.visibility(DocumentInfo.Visibility.API_LEVEL);
         builder.createdTime(Instant.now());
@@ -270,12 +270,62 @@ public class SampleTestObjectCreator {
         return builder;
     }
 
+    public static DocumentInfo.Builder createDefaultFileDocumentationInfo() {
+        //created by admin
+        DocumentInfo.Builder builder = new DocumentInfo.Builder();
+        builder.id(UUID.randomUUID().toString());
+        builder.name(SAMPLE_DOC_NAME);
+        builder.type(DocumentInfo.DocType.HOWTO);
+        builder.summary("Summary of Calculator File Documentation");
+        builder.sourceType(DocumentInfo.SourceType.FILE);
+        builder.otherType(EMPTY_STRING);
+        builder.visibility(DocumentInfo.Visibility.API_LEVEL);
+        builder.createdTime(Instant.now());
+        builder.lastUpdatedTime(Instant.now());
+        return builder;
+    }
+
+    public static DocumentInfo.Builder createDefaultURLDocumentationInfo() {
+        //created by admin
+        DocumentInfo.Builder builder = new DocumentInfo.Builder();
+        builder.id(UUID.randomUUID().toString());
+        builder.name(SAMPLE_DOC_NAME);
+        builder.type(DocumentInfo.DocType.HOWTO);
+        builder.summary("Summary of Calculator URL Documentation");
+        builder.sourceType(DocumentInfo.SourceType.URL);
+        builder.otherType(EMPTY_STRING);
+        builder.visibility(DocumentInfo.Visibility.API_LEVEL);
+        builder.createdTime(Instant.now());
+        builder.lastUpdatedTime(Instant.now());
+        return builder;
+    }
+
+    /**
+     * Retrieves file content byte array
+     *
+     * @return file content byte array
+     * @throws IOException If unable to read doc file resource
+     */
+    public static byte[] createDefaultFileDocumentationContent() throws IOException {
+        return IOUtils.toByteArray(Thread.currentThread().getContextClassLoader().getResourceAsStream(PATH_FILE_DOC_1));
+    }
+
+    /**
+     * Retrieves a sample file inline content string
+     *
+     * @return file inline content string
+     * @throws IOException If unable to read doc file resource
+     */
+    public static String createDefaultInlineDocumentationContent() throws IOException {
+        return IOUtils.toString(Thread.currentThread().getContextClassLoader().getResourceAsStream(PATH_INLINE_DOC_1));
+    }
+
     public static Subscription createSubscription(String uuid) {
-        if(StringUtils.isEmpty(uuid)) {
+        if (StringUtils.isEmpty(uuid)) {
             uuid = UUID.randomUUID().toString();
         }
         Subscription subscription = new Subscription(uuid, createDefaultApplication(), createDefaultAPI().build(),
-                                                     goldApiPolicy);
+                goldApiPolicy);
         subscription.setStatus(APIMgtConstants.SubscriptionStatus.ACTIVE);
         return subscription;
     }
