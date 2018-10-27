@@ -103,14 +103,14 @@ public class DocumentDTO   {
   @SerializedName("sourceType")
   private SourceTypeEnum sourceType = null;
 
-  @SerializedName("sourceUrl")
-  private String sourceUrl = null;
-
-  @SerializedName("inlineContent")
-  private String inlineContent = null;
+  @SerializedName("content")
+  private String content = null;
 
   @SerializedName("otherTypeName")
   private String otherTypeName = null;
+
+  @SerializedName("fileName")
+  private String fileName = null;
 
   public DocumentDTO documentId(String documentId) {
     this.documentId = documentId;
@@ -202,40 +202,22 @@ public class DocumentDTO   {
     this.sourceType = sourceType;
   }
 
-  public DocumentDTO sourceUrl(String sourceUrl) {
-    this.sourceUrl = sourceUrl;
+  public DocumentDTO content(String content) {
+    this.content = content;
     return this;
   }
 
    /**
-   * Get sourceUrl
-   * @return sourceUrl
+   * Get content
+   * @return content
   **/
-  @ApiModelProperty(value = "")
-  public String getSourceUrl() {
-    return sourceUrl;
+  @ApiModelProperty(example = "This includes either the documentation URL or an inline content which is a short doc content.", value = "")
+  public String getContent() {
+    return content;
   }
 
-  public void setSourceUrl(String sourceUrl) {
-    this.sourceUrl = sourceUrl;
-  }
-
-  public DocumentDTO inlineContent(String inlineContent) {
-    this.inlineContent = inlineContent;
-    return this;
-  }
-
-   /**
-   * Get inlineContent
-   * @return inlineContent
-  **/
-  @ApiModelProperty(value = "")
-  public String getInlineContent() {
-    return inlineContent;
-  }
-
-  public void setInlineContent(String inlineContent) {
-    this.inlineContent = inlineContent;
+  public void setContent(String content) {
+    this.content = content;
   }
 
   public DocumentDTO otherTypeName(String otherTypeName) {
@@ -256,6 +238,24 @@ public class DocumentDTO   {
     this.otherTypeName = otherTypeName;
   }
 
+  public DocumentDTO fileName(String fileName) {
+    this.fileName = fileName;
+    return this;
+  }
+
+   /**
+   * Get fileName
+   * @return fileName
+  **/
+  @ApiModelProperty(example = "This includes the file name which is only included for FILE type documentation", value = "")
+  public String getFileName() {
+    return fileName;
+  }
+
+  public void setFileName(String fileName) {
+    this.fileName = fileName;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -271,14 +271,14 @@ public class DocumentDTO   {
         Objects.equals(this.type, document.type) &&
         Objects.equals(this.summary, document.summary) &&
         Objects.equals(this.sourceType, document.sourceType) &&
-        Objects.equals(this.sourceUrl, document.sourceUrl) &&
-        Objects.equals(this.inlineContent, document.inlineContent) &&
-        Objects.equals(this.otherTypeName, document.otherTypeName);
+        Objects.equals(this.content, document.content) &&
+        Objects.equals(this.otherTypeName, document.otherTypeName) &&
+        Objects.equals(this.fileName, document.fileName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(documentId, name, type, summary, sourceType, sourceUrl, inlineContent, otherTypeName);
+    return Objects.hash(documentId, name, type, summary, sourceType, content, otherTypeName, fileName);
   }
 
   @Override
@@ -291,9 +291,9 @@ public class DocumentDTO   {
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    summary: ").append(toIndentedString(summary)).append("\n");
     sb.append("    sourceType: ").append(toIndentedString(sourceType)).append("\n");
-    sb.append("    sourceUrl: ").append(toIndentedString(sourceUrl)).append("\n");
-    sb.append("    inlineContent: ").append(toIndentedString(inlineContent)).append("\n");
+    sb.append("    content: ").append(toIndentedString(content)).append("\n");
     sb.append("    otherTypeName: ").append(toIndentedString(otherTypeName)).append("\n");
+    sb.append("    fileName: ").append(toIndentedString(fileName)).append("\n");
     sb.append("}");
     return sb.toString();
   }

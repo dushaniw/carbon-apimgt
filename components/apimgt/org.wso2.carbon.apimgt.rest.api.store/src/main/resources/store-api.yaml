@@ -3547,12 +3547,14 @@ definitions:
           - INLINE
           - URL
           - FILE
-      sourceUrl:
+      content:
         type: string
-      inlineContent:
-        type: string
+        example: "This includes either the documentation URL or an inline content which is a short doc content."
       otherTypeName:
         type: string
+      fileName:
+        type: string
+        example: "This includes the file name which is only included for FILE type documentation"
 
 #-----------------------------------------------------
 # The Tier List resource
