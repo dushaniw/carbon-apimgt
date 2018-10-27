@@ -70,7 +70,7 @@ public class TestUtil {
 
     protected static DocumentInfo createAPIDoc(String docId, String name, String fileName, String summary,
                                                DocumentInfo.DocType docType, String otherType, DocumentInfo.SourceType
-                                                       sourceType, String sourceUrl, DocumentInfo.Visibility visibility) {
+                                                       sourceType, String content, DocumentInfo.Visibility visibility) {
 
         return new DocumentInfo.Builder().
                 id(docId).
@@ -80,15 +80,13 @@ public class TestUtil {
                 type(docType).
                 otherType(otherType).
                 sourceType(sourceType).
-                sourceURL(sourceUrl).
+                content(content).
                 visibility(visibility).build();
     }
 
-    protected static DocumentContent createDocContent(DocumentInfo documentInfo, String
-            inlineContent, InputStream fileContent) {
+    protected static DocumentContent createDocContent(DocumentInfo documentInfo, InputStream fileContent) {
 
-        return new DocumentContent.Builder().documentInfo(documentInfo).inlineContent(inlineContent).
-                fileContent(fileContent).build();
+        return new DocumentContent.Builder().documentInfo(documentInfo).fileContent(fileContent).build();
 
     }
 

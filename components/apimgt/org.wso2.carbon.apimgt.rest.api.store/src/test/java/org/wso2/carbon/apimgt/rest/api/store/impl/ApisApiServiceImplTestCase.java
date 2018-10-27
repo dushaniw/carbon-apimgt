@@ -50,6 +50,7 @@ import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
+import org.wso2.carbon.apimgt.rest.api.store.common.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.RatingDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.CommentMappingUtil;
@@ -57,6 +58,7 @@ import org.wso2.carbon.apimgt.rest.api.store.mappings.RatingMappingUtil;
 import org.wso2.msf4j.Request;
 import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -388,7 +390,8 @@ public class ApisApiServiceImplTestCase {
     }
 
     @Test
-    public void testApisApiIdDocumentsDocumentIdContentGet() throws APIManagementException, NotFoundException {
+    public void testApisApiIdDocumentsDocumentIdContentGet() throws APIManagementException, NotFoundException,
+            IOException {
         printTestMethodName();
         String apiId = UUID.randomUUID().toString();
 
@@ -403,15 +406,17 @@ public class ApisApiServiceImplTestCase {
         String documentIdFile = UUID.randomUUID().toString();
         String documentIdInline = UUID.randomUUID().toString();
 
-        DocumentInfo documentInfoFile =
-                TestUtil.createAPIDoc(documentIdFile, "documentInfoFile", "", "API1 documentation file", DocumentInfo.DocType.HOWTO,
-                        "other type", DocumentInfo.SourceType.FILE, "", DocumentInfo.Visibility.PRIVATE);
-        DocumentInfo documentInfoInline =
-                TestUtil.createAPIDoc(documentIdInline, "documentInfoInline", "", "API1 documentation inline", DocumentInfo.DocType.HOWTO,
-                        "other type", DocumentInfo.SourceType.INLINE, "", DocumentInfo.Visibility.PRIVATE);
+        DocumentInfo documentInfoFile = TestUtil.createAPIDoc(documentIdFile, "documentInfoFile",
+                "api1_doc2.pdf", "API1 documentation file", DocumentInfo.DocType.HOWTO, "",
+                        DocumentInfo.SourceType.FILE, "", DocumentInfo.Visibility.PRIVATE);
+        DocumentInfo documentInfoInline = TestUtil.createAPIDoc(documentIdInline, "documentInfoInline", "",
+                        "API1 documentation inline", DocumentInfo.DocType.HOWTO, "",
+                DocumentInfo.SourceType.INLINE, "Sample inline content for API1 DOC 2",
+                DocumentInfo.Visibility.PRIVATE);
 
-        DocumentContent documentContentFIle = TestUtil.createDocContent(documentInfoFile, "Sample inline content for API1 DOC 1", null);
-        DocumentContent documentContentInline = TestUtil.createDocContent(documentInfoInline, "Sample inline content for API1 DOC 2", null);
+        DocumentContent documentContentFIle = TestUtil.createDocContent(documentInfoFile,
+                new ByteArrayInputStream(SampleTestObjectCreator.getDefaultFileDocumentationContent()));
+        DocumentContent documentContentInline = TestUtil.createDocContent(documentInfoInline, null);
 
         Mockito.when(apiStore.getDocumentationContent(documentIdFile)).thenReturn(documentContentFIle);
         Mockito.when(apiStore.getDocumentationContent(documentIdInline)).thenReturn(documentContentInline);
@@ -470,8 +475,9 @@ public class ApisApiServiceImplTestCase {
         PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         DocumentInfo documentInfoFile =
-                TestUtil.createAPIDoc(documentId, "documentInfo", "", "API1 documentation file", DocumentInfo.DocType.HOWTO,
-                        "other type", DocumentInfo.SourceType.FILE, "", DocumentInfo.Visibility.PRIVATE);
+                TestUtil.createAPIDoc(documentId, "documentInfo", "", "API1 documentation file",
+                        DocumentInfo.DocType.HOWTO, "other type", DocumentInfo.SourceType.FILE, "",
+                        DocumentInfo.Visibility.PRIVATE);
 
         Mockito.when(apiStore.getDocumentationSummary(documentId)).thenReturn(documentInfoFile);
 
@@ -508,7 +514,6 @@ public class ApisApiServiceImplTestCase {
     public void testApisApiIdDocumentsGet() throws APIManagementException, NotFoundException {
         printTestMethodName();
         String apiId = UUID.randomUUID().toString();
-        String documentId = UUID.randomUUID().toString();
 
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         APIStore apiStore = Mockito.mock(APIStoreImpl.class);
@@ -519,10 +524,12 @@ public class ApisApiServiceImplTestCase {
         PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         DocumentInfo documentInfo1 =
-                TestUtil.createAPIDoc(UUID.randomUUID().toString(), "documentInfo1", "", "API1 documentation 1", DocumentInfo.DocType.HOWTO,
+                TestUtil.createAPIDoc(UUID.randomUUID().toString(), "documentInfo1", "",
+                        "API1 documentation 1", DocumentInfo.DocType.HOWTO,
                         "other type", DocumentInfo.SourceType.FILE, "", DocumentInfo.Visibility.PRIVATE);
         DocumentInfo documentInfo2 =
-                TestUtil.createAPIDoc(UUID.randomUUID().toString(), "documentInfo2", "", "API1 documentation 2", DocumentInfo.DocType.HOWTO,
+                TestUtil.createAPIDoc(UUID.randomUUID().toString(), "documentInfo2", "",
+                        "API1 documentation 2", DocumentInfo.DocType.HOWTO,
                         "other type", DocumentInfo.SourceType.FILE, "", DocumentInfo.Visibility.PRIVATE);
 
         List<DocumentInfo> documentInfoList = new ArrayList<>();
@@ -531,8 +538,7 @@ public class ApisApiServiceImplTestCase {
 
         Mockito.when(apiStore.getAllDocumentation(apiId, 0, 10)).thenReturn(documentInfoList);
 
-        Response response = apisApiService.apisApiIdDocumentsGet
-                (apiId, 10, 0, null, request);
+        Response response = apisApiService.apisApiIdDocumentsGet(apiId, 10, 0, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }

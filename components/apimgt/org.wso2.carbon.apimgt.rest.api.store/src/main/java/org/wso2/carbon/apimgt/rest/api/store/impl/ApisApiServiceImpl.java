@@ -191,7 +191,6 @@ public class ApisApiServiceImpl extends ApisApiService {
         }
     }
 
-
     /**
      * Retrives A list of comments for a given API ID
      *
@@ -220,7 +219,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
     }
-
 
     /**
      * Add a new comment
@@ -312,7 +310,6 @@ public class ApisApiServiceImpl extends ApisApiService {
         }
     }
 
-
     /**
      * Retrieves the content of the document
      *
@@ -330,7 +327,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
-            String existingFingerprint = apisApiIdDocumentsDocumentIdContentGetFingerprint(apiId, documentId,
+            String existingFingerprint = apisApiIdDocumentsDocumentIdGetFingerprint(apiId, documentId,
                     ifNoneMatch, ifModifiedSince, request);
             if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
                     .contains(existingFingerprint)) {
@@ -347,7 +344,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                         .header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"")
                         .build();
             } else if (DocumentInfo.SourceType.INLINE.equals(documentInfo.getSourceType())) {
-                String content = documentationContent.getInlineContent();
+                String content = documentInfo.getContent();
                 return Response.ok(content)
                         .header(RestApiConstants.HEADER_CONTENT_TYPE, MediaType.TEXT_PLAIN)
                         .header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"")
@@ -375,33 +372,6 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     /**
-     * Retrieves the fingerprint of a document content given its UUID
-     *
-     * @param apiId           API ID
-     * @param documentId      Document ID
-     * @param ifNoneMatch     If-None-Match header value
-     * @param ifModifiedSince If-Modified-Since header value
-     * @param request         msf4j request object
-     * @return Fingerprint of the document content
-     */
-    public String apisApiIdDocumentsDocumentIdContentGetFingerprint(String apiId, String documentId, String ifNoneMatch,
-                                                                    String ifModifiedSince, Request request) {
-        String username = RestApiUtil.getLoggedInUsername(request);
-        try {
-            String lastUpdatedTime = RestApiUtil.getConsumer(username)
-                    .getLastUpdatedTimeOfDocumentContent(apiId, documentId);
-            return ETagUtils.generateETag(lastUpdatedTime);
-        } catch (APIManagementException e) {
-            //gives a warning and let it continue the execution
-            String errorMessage =
-                    "Error while retrieving last updated time of content of document " + documentId + " of API "
-                            + apiId;
-            log.error(errorMessage, e);
-            return null;
-        }
-    }
-
-    /**
      * Retrives the document identified by the API's ID and the document's ID
      *
      * @param apiId           UUID of API
@@ -415,7 +385,6 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String ifNoneMatch,
                                                     String ifModifiedSince, Request request) throws NotFoundException {
-        DocumentDTO documentDTO = null;
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
@@ -427,9 +396,15 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
 
             DocumentInfo documentInfo = apiStore.getDocumentationSummary(documentId);
-            documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentInfo);
-            return Response.ok().entity(documentDTO)
-                    .header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").build();
+            if (documentInfo != null) {
+                return Response.ok().entity(DocumentationMappingUtil.fromDocumentationToDTO(documentInfo))
+                        .header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").build();
+            } else {
+                String msg = "Documentation not found " + documentId;
+                log.error(msg);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
+                return Response.status(Response.Status.NOT_FOUND).entity(errorDTO).build();
+            }
         } catch (APIManagementException e) {
             String errorMessage =
                     "Error while retrieving documentation for given apiId " + apiId + "with docId " + documentId;
@@ -457,8 +432,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                                                              String ifModifiedSince, Request request) {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
-            String lastUpdatedTime = RestApiUtil.getConsumer(username)
-                    .getLastUpdatedTimeOfDocument(documentId);
+            String lastUpdatedTime = RestApiUtil.getConsumer(username).getLastUpdatedTimeOfDocument(documentId);
             return ETagUtils.generateETag(lastUpdatedTime);
         } catch (APIManagementException e) {
             //gives a warning and let it continue the execution
@@ -607,12 +581,13 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
     }
+
     /**
      * Generates an SDK for a API with provided ID and language
      *
-     * @param apiId   API ID
-     * @param language   SDK language
-     * @param request msf4j request object
+     * @param apiId    API ID
+     * @param language SDK language
+     * @param request  msf4j request object
      * @return ZIP file for the generated SDK
      * @throws NotFoundException if failed to find method implementation
      */
@@ -621,7 +596,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         if (StringUtils.isBlank(apiId) || StringUtils.isBlank(language)) {
             String errorMessage = "API ID or language is not valid";
             log.error(errorMessage);
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 400L,errorMessage);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 400L, errorMessage);
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(errorDTO)
                     .build();
@@ -817,7 +792,6 @@ public class ApisApiServiceImpl extends ApisApiService {
         }
     }
 
-
     /**
      * Retrieves the swagger definition of an API
      *
@@ -851,7 +825,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
     }
-
 
     /**
      * Retrieves the fingerprint of the swagger given its API's ID
@@ -898,7 +871,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             String username = RestApiUtil.getLoggedInUsername(request);
             APIStore apiStore = RestApiUtil.getConsumer(username);
             Set<String> labelList = new HashSet<>();
-            if (labels != null){
+            if (labels != null) {
                 labelList.addAll(Arrays.asList(labels.split(",")));
             }
             apisResult = apiStore.searchAPIsByStoreLabels(query, offset, limit, labelList);

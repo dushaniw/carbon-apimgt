@@ -669,7 +669,6 @@ public class ApisApiServiceImpl extends ApisApiService {
                 String msg = "Documentation not found " + documentId;
                 log.error(msg);
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
-                log.error(msg);
                 return Response.status(Response.Status.NOT_FOUND).entity(errorDTO).build();
             }
         } catch (APIManagementException e) {

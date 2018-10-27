@@ -18,6 +18,7 @@
  */
 package org.wso2.carbon.apimgt.rest.api.store.common;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,7 @@ import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
+import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Subscription;
@@ -40,6 +42,7 @@ import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -111,8 +114,8 @@ public class SampleTestObjectCreator {
     private static final String ALT_GTW_CONFIG_PATH = "api/alternativeGatewayConfig.bal";
     private static final String PATH_THUMBNAIL_IMG_1 = "api/thumbnail1.jpg";
     private static final String PATH_THUMBNAIL_IMG_2 = "api/thumbnail2.jpg";
-    private static final String PATH_INLINE_DOC_1 = "document/inline1.txt";
     private static final String PATH_INLINE_DOC_2 = "document/inline2.txt";
+    private static final String PATH_FILE_DOC_1 = "api1_doc2.pdf";
     private static final String SAMPLE_IP_1 = "12.32.45.3";
     private static final String SAMPLE_IP_2 = "24.34.1.45";
     private static final String SAMPLE_CUSTOM_RULE = "Sample Custom Rule";
@@ -297,4 +300,15 @@ public class SampleTestObjectCreator {
         subscriptionPolicy.setDefaultQuotaPolicy(quotaPolicy);
         return subscriptionPolicy;
     }
+
+    /**
+     * Retrieves file content byte array
+     *
+     * @return file content byte array
+     * @throws IOException If unable to read doc file resource
+     */
+    public static byte[] getDefaultFileDocumentationContent() throws IOException {
+        return IOUtils.toByteArray(Thread.currentThread().getContextClassLoader().getResourceAsStream(PATH_FILE_DOC_1));
+    }
+
 }
