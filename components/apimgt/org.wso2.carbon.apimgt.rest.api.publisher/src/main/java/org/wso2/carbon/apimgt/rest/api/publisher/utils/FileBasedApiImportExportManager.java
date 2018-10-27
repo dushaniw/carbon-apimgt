@@ -470,7 +470,8 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
             String inlineContent = getDocumentContentAsText(documentContentPath + File.separator +
                     documentInfo.getName());
             if (inlineContent != null) {
-                return documentContentBuilder.inlineContent(inlineContent).documentInfo(documentInfo).build();
+                DocumentInfo modifiedDocInfo = new DocumentInfo.Builder(documentInfo).content(inlineContent).build();
+                return documentContentBuilder.documentInfo(modifiedDocInfo).build();
             }
         }
 
@@ -597,7 +598,7 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
                                 .createFile(apiExportDir + File.separator + content.getDocumentInfo().getName());
                         APIFileUtils
                                 .writeToFile(apiExportDir + File.separator + content.getDocumentInfo().getName(),
-                                        content.getInlineContent());
+                                        content.getDocumentInfo().getContent());
                         // modify the document metadata to contain the inline content name
                         DocumentInfo modifiedDocInfo = new DocumentInfo.Builder(aDocumentInfo)
                                 .name(content.getDocumentInfo().

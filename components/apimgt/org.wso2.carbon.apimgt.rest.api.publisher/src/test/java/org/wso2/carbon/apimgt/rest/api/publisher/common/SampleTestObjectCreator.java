@@ -291,6 +291,7 @@ public class SampleTestObjectCreator {
         builder.id(UUID.randomUUID().toString());
         builder.name(SAMPLE_DOC_NAME);
         builder.type(DocumentInfo.DocType.HOWTO);
+        builder.content("");
         builder.summary("Summary of Calculator URL Documentation");
         builder.sourceType(DocumentInfo.SourceType.URL);
         builder.otherType(EMPTY_STRING);

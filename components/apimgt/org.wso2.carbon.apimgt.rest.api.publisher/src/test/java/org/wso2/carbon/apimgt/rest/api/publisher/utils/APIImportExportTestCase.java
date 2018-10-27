@@ -93,28 +93,38 @@ public class APIImportExportTestCase {
                 (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("abcd").build();
         Endpoint api1ProdEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
                 (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("cdef").build();
-        API api1 = createApi("provider1", api1Id, "testapi1", "1.0.0", "Test API 1 - version 1.0.0",
-                createEndpointTypeToIdMap(api1SandBoxEndpointId, api1ProdEndpointId)).build();
+        API api1 = createApi("provider1", api1Id, "testapi1", "1.0.0",
+                "Test API 1 - version 1.0.0", createEndpointTypeToIdMap(api1SandBoxEndpointId,
+                        api1ProdEndpointId)).build();
 
         String api1Doc1Id = UUID.randomUUID().toString();
-        DocumentInfo api1Doc1Info = createAPIDoc(api1Doc1Id, "api1doc1", "", "API 1 DOC 1", DocumentInfo.DocType.HOWTO,
-                "other type", DocumentInfo.SourceType.INLINE, "", DocumentInfo.Visibility.PRIVATE);
+        DocumentInfo api1Doc1Info = createAPIDoc(api1Doc1Id, "api1doc1", "", "API 1 DOC 1",
+                DocumentInfo.DocType.HOWTO, "", DocumentInfo.SourceType.INLINE,
+                "Sample inline content for API1 DOC 1", DocumentInfo.Visibility.PRIVATE);
         String api1Doc2Id = UUID.randomUUID().toString();
-        DocumentInfo api1Doc2Info = createAPIDoc(api1Doc2Id, "api1doc2.pdf", "api1doc2.pdf", "API 1 DOC 2",
-                DocumentInfo.DocType.PUBLIC_FORUM, "other type", DocumentInfo.SourceType.FILE, "", DocumentInfo.Visibility.API_LEVEL);
+        DocumentInfo api1Doc2Info = createAPIDoc(api1Doc2Id, "api1doc2.pdf", "api1doc2.pdf",
+                "API 1 DOC 2", DocumentInfo.DocType.PUBLIC_FORUM, "", DocumentInfo.SourceType.FILE,
+                "", DocumentInfo.Visibility.API_LEVEL);
         String api1Doc3Id = UUID.randomUUID().toString();
-        DocumentInfo api1Doc3Info = createAPIDoc(api1Doc3Id, "api1doc3", "", "API 1 DOC 3", DocumentInfo.DocType.OTHER,
-                "other type", DocumentInfo.SourceType.OTHER, "", DocumentInfo.Visibility.API_LEVEL);
+        DocumentInfo api1Doc3Info = createAPIDoc(api1Doc3Id, "api1doc3", "", "API 1 DOC 3",
+                DocumentInfo.DocType.OTHER, "other type", DocumentInfo.SourceType.OTHER, "",
+                DocumentInfo.Visibility.API_LEVEL);
+        String api1Doc4Id = UUID.randomUUID().toString();
+        DocumentInfo api1Doc4Info = createAPIDoc(api1Doc4Id, "api1doc4", "", "API 1 DOC 4",
+                DocumentInfo.DocType.SUPPORT_FORUM, "", DocumentInfo.SourceType.URL,
+                "http://api2.org/documentation/1", DocumentInfo.Visibility.PRIVATE);
 
         List<DocumentInfo> api1DocumentInfo = new ArrayList<>();
         api1DocumentInfo.add(api1Doc1Info);
         api1DocumentInfo.add(api1Doc2Info);
         api1DocumentInfo.add(api1Doc3Info);
+        api1DocumentInfo.add(api1Doc4Info);
 
         // contents for documents
-        DocumentContent api1Doc1Content = createDocContent(api1Doc1Info, "Sample inline content for API1 DOC 1", null);
-        DocumentContent api1Doc2Content = createDocContent(api1Doc2Info, "", api1Doc2Stream);
-        DocumentContent api1Doc3Content = createDocContent(api1Doc3Info, "", null);
+        DocumentContent api1Doc1Content = createDocContent(api1Doc1Info, null);
+        DocumentContent api1Doc2Content = createDocContent(api1Doc2Info, api1Doc2Stream);
+        DocumentContent api1Doc3Content = createDocContent(api1Doc3Info, null);
+        DocumentContent api1Doc4Content = createDocContent(api1Doc4Info, null);
 
         Mockito.when(apiPublisher.getAPIbyUUID(api1Id)).thenReturn(api1);
         Mockito.when(apiPublisher.getApiSwaggerDefinition(api1Id)).thenReturn(api1Definition);
@@ -123,6 +133,7 @@ public class APIImportExportTestCase {
         Mockito.when(apiPublisher.getDocumentationContent(api1Doc1Id)).thenReturn(api1Doc1Content);
         Mockito.when(apiPublisher.getDocumentationContent(api1Doc2Id)).thenReturn(api1Doc2Content);
         Mockito.when(apiPublisher.getDocumentationContent(api1Doc3Id)).thenReturn(api1Doc3Content);
+        Mockito.when(apiPublisher.getDocumentationContent(api1Doc4Id)).thenReturn(api1Doc4Content);
         Mockito.when(apiPublisher.getThumbnailImage(api1Id)).thenReturn(getClass().getClassLoader().getResourceAsStream
                 ("api1_thumbnail.png"));
         List<API> apis = new ArrayList<>();
@@ -145,28 +156,38 @@ public class APIImportExportTestCase {
                 (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("abcd").build();
         Endpoint api4ProdEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
                 (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("cdef").build();
-        API api4 = createApi("provider4", api4Id, "testapi4", "1.0.0", "Test API 4 - version 1.0.0",
+        API api4 = createApi("provider4", api4Id, "testapi4", "1.0.0",
+                "Test API 4 - version 1.0.0",
                 createEndpointTypeToIdMap(api4SandBoxEndpointId, api4ProdEndpointId)).build();
 
         String api4Doc1Id = UUID.randomUUID().toString();
-        DocumentInfo api4Doc1Info = createAPIDoc(api4Doc1Id, "api1doc1", "", "API 4 DOC 1", DocumentInfo.DocType.HOWTO,
-                "other type", DocumentInfo.SourceType.INLINE, "", DocumentInfo.Visibility.PRIVATE);
+        DocumentInfo api4Doc1Info = createAPIDoc(api4Doc1Id, "api1doc1", "", "API 4 DOC 1",
+                DocumentInfo.DocType.HOWTO, "", DocumentInfo.SourceType.INLINE,
+                "Sample inline content for API1 DOC 1", DocumentInfo.Visibility.PRIVATE);
         String api4Doc2Id = UUID.randomUUID().toString();
-        DocumentInfo api4Doc2Info = createAPIDoc(api4Doc2Id, "api1doc2.pdf", "api1doc2.pdf", "API 4 DOC 2",
-                DocumentInfo.DocType.PUBLIC_FORUM, "other type", DocumentInfo.SourceType.FILE, "", DocumentInfo.Visibility.API_LEVEL);
+        DocumentInfo api4Doc2Info = createAPIDoc(api4Doc2Id, "api1doc2.pdf", "api1doc2.pdf",
+                "API 4 DOC 2", DocumentInfo.DocType.PUBLIC_FORUM, "",
+                DocumentInfo.SourceType.FILE, "", DocumentInfo.Visibility.API_LEVEL);
         String api4Doc3Id = UUID.randomUUID().toString();
-        DocumentInfo api4Doc3Info = createAPIDoc(api4Doc3Id, "api1doc3", "", "API 4 DOC 3", DocumentInfo.DocType.OTHER,
-                "other type", DocumentInfo.SourceType.OTHER, "", DocumentInfo.Visibility.API_LEVEL);
+        DocumentInfo api4Doc3Info = createAPIDoc(api4Doc3Id, "api1doc3", "", "API 4 DOC 3",
+                DocumentInfo.DocType.OTHER, "other type", DocumentInfo.SourceType.OTHER, "",
+                DocumentInfo.Visibility.API_LEVEL);
+        String api4Doc4Id = UUID.randomUUID().toString();
+        DocumentInfo api4Doc4Info = createAPIDoc(api4Doc4Id, "api1doc4", "", "API 4 DOC 4",
+                DocumentInfo.DocType.OTHER, "other type", DocumentInfo.SourceType.URL,
+                "http://api2.org/documentation/1", DocumentInfo.Visibility.API_LEVEL);
 
         List<DocumentInfo> api1DocumentInfo = new ArrayList<>();
         api1DocumentInfo.add(api4Doc1Info);
         api1DocumentInfo.add(api4Doc2Info);
         api1DocumentInfo.add(api4Doc3Info);
+        api1DocumentInfo.add(api4Doc4Info);
 
         // contents for documents
-        DocumentContent api4Doc1Content = createDocContent(api4Doc1Info, "Sample inline content for API1 DOC 1", null);
-        DocumentContent api4Doc2Content = createDocContent(api4Doc2Info, "", api1Doc2Stream);
-        DocumentContent api4Doc3Content = createDocContent(api4Doc3Info, "", null);
+        DocumentContent api4Doc1Content = createDocContent(api4Doc1Info, null);
+        DocumentContent api4Doc2Content = createDocContent(api4Doc2Info, api1Doc2Stream);
+        DocumentContent api4Doc3Content = createDocContent(api4Doc3Info, null);
+        DocumentContent api4Doc4Content = createDocContent(api4Doc4Info, null);
 
         Mockito.when(apiPublisher.getAPIbyUUID(api4Id)).thenReturn(api4);
         Mockito.when(apiPublisher.getApiSwaggerDefinition(api4Id)).thenReturn(api1Definition);
@@ -175,6 +196,7 @@ public class APIImportExportTestCase {
         Mockito.when(apiPublisher.getDocumentationContent(api4Doc1Id)).thenReturn(api4Doc1Content);
         Mockito.when(apiPublisher.getDocumentationContent(api4Doc2Id)).thenReturn(api4Doc2Content);
         Mockito.when(apiPublisher.getDocumentationContent(api4Doc3Id)).thenReturn(api4Doc3Content);
+        Mockito.when(apiPublisher.getDocumentationContent(api4Doc3Id)).thenReturn(api4Doc4Content);
         Mockito.when(apiPublisher.getThumbnailImage(api4Id)).thenReturn(null);
 
         String api5Id = UUID.randomUUID().toString();
@@ -186,19 +208,21 @@ public class APIImportExportTestCase {
                 createEndpointTypeToIdMap(api5SandBoxEndpointId, api5ProdEndpointId)).build();
 
         String api5Doc1Id = UUID.randomUUID().toString();
-        DocumentInfo api5Doc1Info = createAPIDoc(api5Doc1Id, "api1doc1", "", "API 5 DOC 1", DocumentInfo.DocType.HOWTO,
-                "other type", DocumentInfo.SourceType.INLINE, "", DocumentInfo.Visibility.PRIVATE);
+        DocumentInfo api5Doc1Info = createAPIDoc(api5Doc1Id, "api1doc1", "", "API 5 DOC 1",
+                DocumentInfo.DocType.HOWTO, "", DocumentInfo.SourceType.INLINE,
+                "Sample inline content for API5 DOC 1", DocumentInfo.Visibility.PRIVATE);
         String api5Doc3Id = UUID.randomUUID().toString();
-        DocumentInfo api5Doc3Info = createAPIDoc(api5Doc3Id, "api1doc3", "", "API 5 DOC 3", DocumentInfo.DocType.OTHER,
-                "other type", DocumentInfo.SourceType.OTHER, "", DocumentInfo.Visibility.API_LEVEL);
+        DocumentInfo api5Doc3Info = createAPIDoc(api5Doc3Id, "api1doc3", "", "API 5 DOC 3",
+                DocumentInfo.DocType.OTHER, "other type", DocumentInfo.SourceType.OTHER, "",
+                DocumentInfo.Visibility.API_LEVEL);
 
         List<DocumentInfo> api5DocumentInfo = new ArrayList<>();
         api5DocumentInfo.add(api5Doc1Info);
         api5DocumentInfo.add(api5Doc3Info);
 
         // contents for documents
-        DocumentContent api5Doc1Content = createDocContent(api5Doc1Info, "Sample inline content for API1 DOC 1", null);
-        DocumentContent api5Doc3Content = createDocContent(api5Doc3Info, "", null);
+        DocumentContent api5Doc1Content = createDocContent(api5Doc1Info,  null);
+        DocumentContent api5Doc3Content = createDocContent(api5Doc3Info, null);
 
         Mockito.when(apiPublisher.getAPIbyUUID(api5Id)).thenReturn(api5);
         Mockito.when(apiPublisher.getApiSwaggerDefinition(api5Id)).thenReturn(api1Definition);
@@ -235,14 +259,17 @@ public class APIImportExportTestCase {
                 createEndpointTypeToIdMap(api6SandBoxEndpointId, api6ProdEndpointId)).build();
 
         String api6Doc1Id = UUID.randomUUID().toString();
-        DocumentInfo api6Doc1Info = createAPIDoc(api6Doc1Id, "api1doc1", "", "API 6 DOC 1", DocumentInfo.DocType.HOWTO,
-                "other type", DocumentInfo.SourceType.INLINE, "", DocumentInfo.Visibility.PRIVATE);
+        DocumentInfo api6Doc1Info = createAPIDoc(api6Doc1Id, "api6doc1", "", "API 6 DOC 1",
+                DocumentInfo.DocType.HOWTO, "", DocumentInfo.SourceType.INLINE,
+                "Sample inline content for API6 DOC 1", DocumentInfo.Visibility.PRIVATE);
         String api6Doc2Id = UUID.randomUUID().toString();
-        DocumentInfo api6Doc2Info = createAPIDoc(api6Doc2Id, "api1doc2.pdf", "api1doc2.pdf", "API 4 DOC 2",
-                DocumentInfo.DocType.PUBLIC_FORUM, "other type", DocumentInfo.SourceType.FILE, "", DocumentInfo.Visibility.API_LEVEL);
+        DocumentInfo api6Doc2Info = createAPIDoc(api6Doc2Id, "api6doc2.pdf", "api6doc2.pdf",
+                "API 6 DOC 2", DocumentInfo.DocType.PUBLIC_FORUM, "", DocumentInfo.SourceType.FILE,
+                "", DocumentInfo.Visibility.API_LEVEL);
         String api6Doc3Id = UUID.randomUUID().toString();
-        DocumentInfo api6Doc3Info = createAPIDoc(api6Doc3Id, "api1doc3", "", "API 6 DOC 3", DocumentInfo.DocType.OTHER,
-                "other type", DocumentInfo.SourceType.OTHER, "", DocumentInfo.Visibility.API_LEVEL);
+        DocumentInfo api6Doc3Info = createAPIDoc(api6Doc3Id, "api6doc3", "", "API 6 DOC 3",
+                DocumentInfo.DocType.OTHER, "other type", DocumentInfo.SourceType.OTHER, "",
+                DocumentInfo.Visibility.API_LEVEL);
 
         List<DocumentInfo> api1DocumentInfo = new ArrayList<>();
         api1DocumentInfo.add(api6Doc1Info);
@@ -250,9 +277,9 @@ public class APIImportExportTestCase {
         api1DocumentInfo.add(api6Doc3Info);
 
         // contents for documents
-        DocumentContent api6Doc1Content = createDocContent(api6Doc1Info, "Sample inline content for API1 DOC 1", null);
-        DocumentContent api6Doc2Content = createDocContent(api6Doc2Info, "", api1Doc2Stream);
-        DocumentContent api6Doc3Content = createDocContent(api6Doc3Info, "", null);
+        DocumentContent api6Doc1Content = createDocContent(api6Doc1Info, null);
+        DocumentContent api6Doc2Content = createDocContent(api6Doc2Info, api1Doc2Stream);
+        DocumentContent api6Doc3Content = createDocContent(api6Doc3Info, null);
 
         Mockito.when(apiPublisher.getAPIbyUUID(api6Id)).thenReturn(api6);
         Mockito.when(apiPublisher.getApiSwaggerDefinition(api6Id)).thenReturn(api1Definition);
@@ -268,23 +295,27 @@ public class APIImportExportTestCase {
         Endpoint api7SandBoxEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
                 (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("abcd").build();
         Endpoint api7ProdEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
-                (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("cdef").build();     API api7 = createApi("provider5", api7Id, "testapi4", "1.0.0", "Test API 7 - version 1.0.0",
+                (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("cdef").build();
+        API api7 = createApi("provider5", api7Id, "testapi4", "1.0.0",
+                "Test API 7 - version 1.0.0",
                 createEndpointTypeToIdMap(api7SandBoxEndpointId, api7ProdEndpointId)).build();
 
         String api7Doc1Id = UUID.randomUUID().toString();
-        DocumentInfo api7Doc1Info = createAPIDoc(api7Doc1Id, "api1doc1", "", "API 7 DOC 1", DocumentInfo.DocType.HOWTO,
-                "other type", DocumentInfo.SourceType.INLINE, "", DocumentInfo.Visibility.PRIVATE);
+        DocumentInfo api7Doc1Info = createAPIDoc(api7Doc1Id, "api1doc1", "", "API 7 DOC 1",
+                DocumentInfo.DocType.HOWTO, "", DocumentInfo.SourceType.INLINE,
+                "Sample inline content for API1 DOC 1", DocumentInfo.Visibility.PRIVATE);
         String api7Doc3Id = UUID.randomUUID().toString();
-        DocumentInfo api7Doc3Info = createAPIDoc(api7Doc3Id, "api1doc3", "", "API 7 DOC 3", DocumentInfo.DocType.OTHER,
-                "other type", DocumentInfo.SourceType.OTHER, "", DocumentInfo.Visibility.API_LEVEL);
+        DocumentInfo api7Doc3Info = createAPIDoc(api7Doc3Id, "api1doc3", "", "API 7 DOC 3",
+                DocumentInfo.DocType.OTHER, "other type", DocumentInfo.SourceType.OTHER, "",
+                DocumentInfo.Visibility.API_LEVEL);
 
         List<DocumentInfo> api7DocumentInfo = new ArrayList<>();
         api7DocumentInfo.add(api7Doc1Info);
         api7DocumentInfo.add(api7Doc3Info);
 
         // contents for documents
-        DocumentContent api7Doc1Content = createDocContent(api7Doc1Info, "Sample inline content for API1 DOC 1", null);
-        DocumentContent api7Doc3Content = createDocContent(api7Doc3Info, "", null);
+        DocumentContent api7Doc1Content = createDocContent(api7Doc1Info, null);
+        DocumentContent api7Doc3Content = createDocContent(api7Doc3Info, null);
 
         Mockito.when(apiPublisher.getAPIbyUUID(api7Id)).thenReturn(api7);
         Mockito.when(apiPublisher.getApiSwaggerDefinition(api7Id)).thenReturn(api1Definition);
@@ -316,19 +347,23 @@ public class APIImportExportTestCase {
         Endpoint api2SandBoxEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
                 (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("abcd").build();
         Endpoint api2ProdEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
-                (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("cdef").build();   API api2 = createApi("provider1", api2Id, "testapi1", "1.0.0", "Test API 1 - version 1.0.0",
+                (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("cdef").build();
+        API api2 = createApi("provider1", api2Id, "testapi1", "1.0.0",
+                "Test API 1 - version 1.0.0",
                 createEndpointTypeToIdMap(api2SandBoxEndpointId, api2ProdEndpointId)).build();
 
         String api2Doc1Id = UUID.randomUUID().toString();
-        DocumentInfo api2Doc1Info = createAPIDoc(api2Doc1Id, "api1doc1", "", "API 2 DOC 1", DocumentInfo.DocType.HOWTO,
-                "other type", DocumentInfo.SourceType.INLINE, "", DocumentInfo.Visibility.PRIVATE);
+        DocumentInfo api2Doc1Info = createAPIDoc(api2Doc1Id, "api1doc1", "", "API 2 DOC 1",
+                DocumentInfo.DocType.HOWTO, "", DocumentInfo.SourceType.INLINE,
+                "Sample inline content for API1 DOC 1", DocumentInfo.Visibility.PRIVATE);
         String api2Doc2Id = UUID.randomUUID().toString();
-        DocumentInfo api2Doc2Info = createAPIDoc(api2Doc2Id, "api1doc2.pdf", "api1doc2.pdf", "API 2 DOC 2",
-                DocumentInfo.DocType.PUBLIC_FORUM, "other type", DocumentInfo.SourceType.FILE, "",
-                DocumentInfo.Visibility.API_LEVEL);
+        DocumentInfo api2Doc2Info = createAPIDoc(api2Doc2Id, "api1doc2.pdf", "api1doc2.pdf",
+                "API 2 DOC 2", DocumentInfo.DocType.PUBLIC_FORUM, "other type",
+                DocumentInfo.SourceType.FILE, "", DocumentInfo.Visibility.API_LEVEL);
         String api2Doc3Id = UUID.randomUUID().toString();
-        DocumentInfo api2Doc3Info = createAPIDoc(api2Doc3Id, "api1doc3", "", "API 2 DOC 3", DocumentInfo.DocType.OTHER,
-                "other type", DocumentInfo.SourceType.OTHER, "", DocumentInfo.Visibility.API_LEVEL);
+        DocumentInfo api2Doc3Info = createAPIDoc(api2Doc3Id, "api1doc3", "", "API 2 DOC 3",
+                DocumentInfo.DocType.OTHER, "other type", DocumentInfo.SourceType.OTHER, "",
+                DocumentInfo.Visibility.API_LEVEL);
 
         Set<DocumentInfo> api2DocumentInfo = new HashSet<>();
         api2DocumentInfo.add(api2Doc1Info);
@@ -336,9 +371,9 @@ public class APIImportExportTestCase {
         api2DocumentInfo.add(api2Doc3Info);
 
         // contents for documents
-        DocumentContent api2Doc1Content = createDocContent(api2Doc1Info, "Sample inline content for API1 DOC 1", null);
-        DocumentContent api2Doc2Content = createDocContent(api2Doc2Info, "", api1Doc2Stream);
-        DocumentContent api2Doc3Content = createDocContent(api2Doc3Info, "", null);
+        DocumentContent api2Doc1Content = createDocContent(api2Doc1Info,  null);
+        DocumentContent api2Doc2Content = createDocContent(api2Doc2Info, api1Doc2Stream);
+        DocumentContent api2Doc3Content = createDocContent(api2Doc3Info, null);
 
         Set<DocumentContent> api2DocContents = new HashSet<>();
         api2DocContents.add(api2Doc1Content);
@@ -374,14 +409,17 @@ public class APIImportExportTestCase {
                 createEndpointTypeToIdMap(api1SandBoxEndpointId, api1ProdEndpointId)).build();
 
         String api1Doc1Id = UUID.randomUUID().toString();
-        DocumentInfo api1Doc1Info = createAPIDoc(api1Doc1Id, "api1doc1", "", "API 1 DOC 1", DocumentInfo.DocType.HOWTO,
-                "other type", DocumentInfo.SourceType.INLINE, "", DocumentInfo.Visibility.PRIVATE);
+        DocumentInfo api1Doc1Info = createAPIDoc(api1Doc1Id, "api1doc1", "", "API 1 DOC 1",
+                DocumentInfo.DocType.HOWTO, "", DocumentInfo.SourceType.INLINE,
+                "Sample inline content for API1 DOC 1", DocumentInfo.Visibility.PRIVATE);
         String api1Doc2Id = UUID.randomUUID().toString();
-        DocumentInfo api1Doc2Info = createAPIDoc(api1Doc2Id, "api1doc2.pdf", "api1doc2.pdf", "API 1 DOC 2",
-                DocumentInfo.DocType.PUBLIC_FORUM, "other type", DocumentInfo.SourceType.FILE, "", DocumentInfo.Visibility.API_LEVEL);
+        DocumentInfo api1Doc2Info = createAPIDoc(api1Doc2Id, "api1doc2.pdf", "api1doc2.pdf",
+                "API 1 DOC 2", DocumentInfo.DocType.PUBLIC_FORUM,
+                "", DocumentInfo.SourceType.FILE, "", DocumentInfo.Visibility.API_LEVEL);
         String api1Doc3Id = UUID.randomUUID().toString();
-        DocumentInfo api1Doc3Info = createAPIDoc(api1Doc3Id, "api1doc3", "", "API 1 DOC 3", DocumentInfo.DocType.OTHER,
-                "other type", DocumentInfo.SourceType.OTHER, "", DocumentInfo.Visibility.API_LEVEL);
+        DocumentInfo api1Doc3Info = createAPIDoc(api1Doc3Id, "api1doc3", "", "API 1 DOC 3",
+                DocumentInfo.DocType.OTHER, "other type", DocumentInfo.SourceType.OTHER, "",
+                DocumentInfo.Visibility.API_LEVEL);
 
         Set<DocumentInfo> api1DocumentInfo = new HashSet<>();
         api1DocumentInfo.add(api1Doc1Info);
@@ -389,9 +427,9 @@ public class APIImportExportTestCase {
         api1DocumentInfo.add(api1Doc3Info);
 
         // contents for documents
-        DocumentContent api1Doc1Content = createDocContent(api1Doc1Info, "Sample inline content for API1 DOC 1", null);
-        DocumentContent api1Doc2Content = createDocContent(api1Doc2Info, "", api1Doc2Stream);
-        DocumentContent api1Doc3Content = createDocContent(api1Doc3Info, "", null);
+        DocumentContent api1Doc1Content = createDocContent(api1Doc1Info, null);
+        DocumentContent api1Doc2Content = createDocContent(api1Doc2Info, api1Doc2Stream);
+        DocumentContent api1Doc3Content = createDocContent(api1Doc3Info, null);
 
         Set<DocumentContent> api1DocContent = new HashSet<>();
         api1DocContent.add(api1Doc1Content);
@@ -425,18 +463,20 @@ public class APIImportExportTestCase {
         apis.add(api2);
 
         String api2Doc1Id = UUID.randomUUID().toString();
-        DocumentInfo api2Doc1Info = createAPIDoc(api2Doc1Id, "api2doc1", "", "API 2 DOC 1", DocumentInfo.DocType.API_MESSAGE_FORMAT,
-                "other type", DocumentInfo.SourceType.INLINE, "", DocumentInfo.Visibility.API_LEVEL);
+        DocumentInfo api2Doc1Info = createAPIDoc(api2Doc1Id, "api2doc1", "", "API 2 DOC 1",
+                DocumentInfo.DocType.API_MESSAGE_FORMAT, "", DocumentInfo.SourceType.INLINE,
+                "Sample inline content for API2 DOC 1", DocumentInfo.Visibility.API_LEVEL);
         String api2Doc2Id = UUID.randomUUID().toString();
-        DocumentInfo api2Doc2Info = createAPIDoc(api2Doc2Id, "api2doc2", "", "API 2 DOC 2", DocumentInfo.DocType.PUBLIC_FORUM,
-                "other type", DocumentInfo.SourceType.URL, "http://api2.org/documentation/1", DocumentInfo.Visibility.PRIVATE);
+        DocumentInfo api2Doc2Info = createAPIDoc(api2Doc2Id, "api2doc2", "", "API 2 DOC 2",
+                DocumentInfo.DocType.PUBLIC_FORUM, "", DocumentInfo.SourceType.URL,
+                "http://api2.org/documentation/1", DocumentInfo.Visibility.PRIVATE);
 
         Set<DocumentInfo> api2DocumentInfo = new HashSet<>();
         api2DocumentInfo.add(api2Doc1Info);
         api2DocumentInfo.add(api2Doc2Info);
 
-        DocumentContent api2Doc1Content = createDocContent(api2Doc1Info, "Sample inline content for API2 DOC 1", null);
-        DocumentContent api2Doc2Content = createDocContent(api2Doc2Info, "", null);
+        DocumentContent api2Doc1Content = createDocContent(api2Doc1Info, null);
+        DocumentContent api2Doc2Content = createDocContent(api2Doc2Info, null);
 
         Set<DocumentContent> api2DocContent = new HashSet<>();
         api2DocContent.add(api2Doc1Content);
@@ -572,7 +612,7 @@ public class APIImportExportTestCase {
 
     private static DocumentInfo createAPIDoc (String docId, String name, String fileName, String summary,
                                               DocumentInfo.DocType docType, String otherType, DocumentInfo.SourceType
-                                                      sourceType, String sourceUrl, DocumentInfo.Visibility visibility) {
+                                                      sourceType, String content, DocumentInfo.Visibility visibility) {
 
         return new DocumentInfo.Builder().
                 id(docId).
@@ -582,15 +622,13 @@ public class APIImportExportTestCase {
                 type(docType).
                 otherType(otherType).
                 sourceType(sourceType).
-                sourceURL(sourceUrl).
+                content(content).
                 visibility(visibility).build();
     }
 
-    private static DocumentContent createDocContent (DocumentInfo documentInfo, String
-            inlineContent, InputStream fileContent) {
+    private static DocumentContent createDocContent (DocumentInfo documentInfo, InputStream fileContent) {
 
-        return new DocumentContent.Builder().documentInfo(documentInfo).inlineContent(inlineContent).
-                fileContent(fileContent).build();
+        return new DocumentContent.Builder().documentInfo(documentInfo).fileContent(fileContent).build();
 
     }
 

@@ -148,7 +148,8 @@ public class ApisApiServiceImplTestCase {
         PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).thenReturn(apiPublisher);
         String api1Id = UUID.randomUUID().toString();
         String documentId = UUID.randomUUID().toString();
-        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultInlineDocumentationInfo().build();
+        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultInlineDocumentationInfo()
+                .content(inlineContent).build();
         DocumentContent documentContent = DocumentContent.newDocumentContent().documentInfo(documentInfo).build();
         Mockito.doReturn(documentContent).doThrow(new IllegalArgumentException()).when(apiPublisher).
                 getDocumentationContent(documentId);
@@ -160,7 +161,7 @@ public class ApisApiServiceImplTestCase {
 
     @Test
     public void testApisApiIdDocumentsDocumentIdContentGetURL() throws Exception {
-        String URL = "https://www.testapidoc.com/docs/123.pdf";
+        String URL = "http://api2.org/documentation/1";
         printTestMethodName();
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
@@ -175,7 +176,7 @@ public class ApisApiServiceImplTestCase {
         Response response = apisApiService.
                 apisApiIdDocumentsDocumentIdContentGet(api1Id, documentId, null, null, getRequest());
         assertEquals(response.getStatus(), 303);
-        assertEquals(URL, response.getHeaderString("Location"));
+        assertTrue(response.getStringHeaders().get("Location").toString().contains(URL));
     }
 
     @Test
@@ -376,7 +377,7 @@ public class ApisApiServiceImplTestCase {
 
     @Test
     public void testApisApiIdDocumentsDocumentIdGetURLDocument() throws Exception {
-        String URL = "https://www.apidoc.com/docs/123.pdf";
+        String URL = "http://api2.org/documentation/1";
         printTestMethodName();
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
@@ -391,7 +392,7 @@ public class ApisApiServiceImplTestCase {
                 null, getRequest());
         assertEquals(response.getStatus(), 200);
         assertTrue(response.getEntity().toString().contains("Summary of Calculator URL Documentation"));
-        assertTrue(response.getEntity().toString().contains("https://www.apidoc.com/docs/123.pdf"));
+        assertTrue(response.getEntity().toString().contains("http://api2.org/documentation/1"));
     }
 
     @Test
@@ -526,10 +527,10 @@ public class ApisApiServiceImplTestCase {
         String apiId = UUID.randomUUID().toString();
         Mockito.doReturn(documentInfo).doThrow(new IllegalArgumentException()).when(apiPublisher)
                 .getDocumentationSummary(documentId);
-        Response response = apisApiService.apisApiIdDocumentsDocumentIdPut(apiId, documentId,
-                documentDTO, null, null, getRequest());
+        Response response = apisApiService.apisApiIdDocumentsDocumentIdPut(apiId, documentId, documentDTO, null,
+                null, getRequest());
         assertEquals(response.getStatus(), 400);
-        assertTrue(response.getEntity().toString().contains("Invalid document sourceUrl Format"));
+        assertTrue(response.getEntity().toString().contains("Invalid document source URL Format"));
     }
 
     @Test
