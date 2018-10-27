@@ -262,7 +262,7 @@ public class DocumentDTO   {
    * Get fileName
    * @return fileName
   **/
-  @ApiModelProperty(example = "", value = "")
+  @ApiModelProperty(example = "This includes the file name which is only included for FILE type documentation", value = "")
   public String getFileName() {
     return fileName;
   }

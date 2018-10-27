@@ -4437,7 +4437,7 @@ definitions:
         example: INLINE
       fileName:
         type: string
-        example: ""
+        example: "This includes the file name which is only included for FILE type documentation"
       content:
         type: string
         example: "This includes either the documentation URL or an inline content which is a short doc content."
