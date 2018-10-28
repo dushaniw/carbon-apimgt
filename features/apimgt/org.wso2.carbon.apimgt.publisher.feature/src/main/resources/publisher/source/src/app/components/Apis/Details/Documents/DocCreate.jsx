@@ -152,7 +152,7 @@ class DocCreate extends React.Component {
             body.otherTypeName = otherTypeName;
         }
         if (uploadMethod === 'URL') {
-            body.sourceUrl = fileUrl;
+            body.content = fileUrl;
             this.client
                 .addDocument(this.apiUUID, body)
                 .then(this.createDocumentCallback);
@@ -174,6 +174,7 @@ class DocCreate extends React.Component {
                 console.log('Select a file to upload.');
                 return;
             }
+            body.fileName = files[0].name;
             this.client
                 .addDocument(this.apiUUID, body)
                 .then(this.uploadDocument)
