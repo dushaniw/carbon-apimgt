@@ -656,8 +656,8 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             String existingFingerprint = apisApiIdDocumentsDocumentIdGetFingerprint(apiId, documentId,
                     ifNoneMatch, ifModifiedSince, request);
-            if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
-                    .contains(existingFingerprint)) {
+            if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) &&
+                    ifNoneMatch.contains(existingFingerprint)) {
                 return Response.notModified().build();
             }
 
@@ -693,8 +693,8 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return fingerprint of the document
      */
     public String apisApiIdDocumentsDocumentIdGetFingerprint(String apiId, String documentId,
-                                                             String ifNoneMatch, String ifModifiedSince, Request
-                                                                     request) {
+                                                             String ifNoneMatch, String ifModifiedSince,
+                                                             Request request) {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username)
@@ -741,7 +741,6 @@ public class ApisApiServiceImpl extends ApisApiService {
                 String msg = "Error while getting document";
                 log.error(msg);
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
-                log.error(msg);
                 return Response.status(Response.Status.NOT_FOUND).entity(errorDTO).build();
             }
             if (body.getType() == DocumentDTO.TypeEnum.OTHER && StringUtils.isBlank(body.getOtherTypeName())) {
@@ -749,7 +748,6 @@ public class ApisApiServiceImpl extends ApisApiService {
                 String msg = "otherTypeName cannot be empty if type is OTHER.";
                 log.error(msg);
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900313L, msg);
-                log.error(msg);
                 return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
             }
             if (body.getSourceType() == DocumentDTO.SourceTypeEnum.URL) {
@@ -758,14 +756,12 @@ public class ApisApiServiceImpl extends ApisApiService {
                     String msg = "Invalid document source URL Format";
                     log.error(msg);
                     ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900313L, msg);
-                    log.error(msg);
                     return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
                 } else if (!StringUtils.isBlank(body.getFileName())) {
                     //check file name is null if sourcetype is URL
                     String msg = "File name should be empty when source type is URL";
                     log.error(msg);
                     ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900313L, msg);
-                    log.error(msg);
                     return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
                 }
             }
@@ -775,14 +771,12 @@ public class ApisApiServiceImpl extends ApisApiService {
                     String msg = "Document inline content cannot be empty";
                     log.error(msg);
                     ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900313L, msg);
-                    log.error(msg);
                     return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
                 } else if (!StringUtils.isBlank(body.getFileName())) {
                     //check file name is null if sourcetype is INLINE
                     String msg = "File name should be empty when source type is INLINE";
                     log.error(msg);
                     ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900313L, msg);
-                    log.error(msg);
                     return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
                 }
             }
@@ -817,7 +811,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
             paramList.put(APIMgtConstants.ExceptionsConstants.DOC_ID, documentId);
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
-            log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
     }
