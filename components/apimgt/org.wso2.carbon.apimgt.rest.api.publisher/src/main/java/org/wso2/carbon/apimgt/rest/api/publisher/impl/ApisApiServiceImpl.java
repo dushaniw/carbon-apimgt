@@ -752,13 +752,13 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
             if (body.getSourceType() == DocumentDTO.SourceTypeEnum.URL) {
                 if (StringUtils.isBlank(body.getContent()) || !RestApiUtil.isURL(body.getContent())) {
-                    //check content is not null and in correct URL format if sourceType is URL
+                    //check content is not blank and in correct URL format if sourceType is URL
                     String msg = "Invalid document source URL Format";
                     log.error(msg);
                     ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900313L, msg);
                     return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
-                } else if (!StringUtils.isBlank(body.getFileName())) {
-                    //check file name is null if sourcetype is URL
+                } else if (!StringUtils.isEmpty(body.getFileName())) {
+                    //check file name is empty if sourcetype is URL
                     String msg = "File name should be empty when source type is URL";
                     log.error(msg);
                     ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900313L, msg);
@@ -767,13 +767,13 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
             if (body.getSourceType() == DocumentDTO.SourceTypeEnum.INLINE) {
                 if (StringUtils.isBlank(body.getContent())) {
-                    //check content is not null if sourceType is INLINE
+                    //check content is not blank if sourceType is INLINE
                     String msg = "Document inline content cannot be empty";
                     log.error(msg);
                     ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900313L, msg);
                     return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
-                } else if (!StringUtils.isBlank(body.getFileName())) {
-                    //check file name is null if sourcetype is INLINE
+                } else if (!StringUtils.isEmpty(body.getFileName())) {
+                    //check file name is empty if sourcetype is INLINE
                     String msg = "File name should be empty when source type is INLINE";
                     log.error(msg);
                     ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900313L, msg);
@@ -782,7 +782,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
             if (body.getSourceType() == DocumentDTO.SourceTypeEnum.FILE) {
                 if (!StringUtils.isBlank(body.getContent())) {
-                    //check content is null if sourcetype is FILE
+                    //check content is blank if sourcetype is FILE
                     RestApiUtil.handleBadRequest("File type document cannot have URL or inline content. Upload " +
                             "file content seperately", log);
                 } else if (StringUtils.isBlank(body.getFileName())) {
@@ -871,30 +871,30 @@ public class ApisApiServiceImpl extends ApisApiService {
             String fileName = body.getFileName();
             if (body.getSourceType() == DocumentDTO.SourceTypeEnum.FILE) {
                 if (!StringUtils.isBlank(content)) {
-                    //check content is null if sourcetype is FILE
+                    //check content is blank if sourcetype is FILE
                     RestApiUtil.handleBadRequest("File type document cannot have URL or inline content. Upload " +
                             "file content seperately", log);
                 } else if (StringUtils.isBlank(fileName)) {
-                    //check file name is not null if sourcetype is FILE
+                    //check file name is not blank if sourcetype is FILE
                     RestApiUtil.handleBadRequest("File name cannot be empty when source type is FILE", log);
                 }
             }
             if (body.getSourceType() == DocumentDTO.SourceTypeEnum.URL) {
                 if (StringUtils.isBlank(content) || !RestApiUtil.isURL(content)) {
-                    //check content is not null and in correct URL format if sourcetype is URL
+                    //check content is not blank and in correct URL format if sourcetype is URL
                     RestApiUtil.handleBadRequest("Invalid document source Url Format", log);
-                } else if (!StringUtils.isBlank(fileName)) {
-                    //check file name is null if sourcetype is URL
+                } else if (!StringUtils.isEmpty(fileName)) {
+                    //check file name is empty if sourcetype is URL
                     RestApiUtil.handleBadRequest("File Name should be empty when source type is URL.", log);
                 }
             }
             if (body.getSourceType() == DocumentDTO.SourceTypeEnum.INLINE) {
                 if (StringUtils.isBlank(content)) {
-                    //check content is not null if sourceType is INLINE
+                    //check content is not blank if sourceType is INLINE
                     RestApiUtil.handleBadRequest("Document inline content cannot be empty when source type is " +
                             "INLINE", log);
-                } else if (!StringUtils.isBlank(fileName)) {
-                    //check file name is null if sourcetype is INLINE
+                } else if (!StringUtils.isEmpty(fileName)) {
+                    //check file name is empty if sourcetype is INLINE
                     RestApiUtil.handleBadRequest("File Name should be empty when source type is INLINE.", log);
                 }
             }
