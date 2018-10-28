@@ -252,7 +252,7 @@ class ApiDocDAO {
      * @throws SQLException
      */
     static InputStream getBinaryDocContent(Connection connection, String docID) throws SQLException, IOException {
-        final String query = "SELECT CONTENT_BINARY_VALUE FROM AM_API_RESOURCES WHERE UUID = ?";
+        final String query = "SELECT CONTENT_BINARY_VALUE FROM AM_API_DOCS WHERE UUID = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, docID);
@@ -278,7 +278,7 @@ class ApiDocDAO {
      */
     static void deleteDocument(Connection connection, String docID)
             throws SQLException {
-        final String query = "DELETE FROM DOCS WHERE UUID = ?";
+        final String query = "DELETE FROM AM_API_DOCS WHERE UUID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, docID);
             statement.execute();

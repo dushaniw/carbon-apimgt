@@ -1602,7 +1602,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNotEquals(fingerprintBeforeUpdate, fingerprintAfterUpdate);
 
         DocumentInfo documentFromDB = apiDAO.getDocumentInfo(documentInfo.getId());
-        Assert.assertNotEquals(documentInfo, documentFromDB);
+        Assert.assertNotEquals(documentInfo.getSummary(), documentFromDB.getSummary());
         Assert.assertEquals(updateDocument, documentFromDB);
     }
 
