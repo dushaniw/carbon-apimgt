@@ -951,7 +951,7 @@
         <javax.ws.rs.import.version.range>[2.0.0,3.0.0)</javax.ws.rs.import.version.range>
         <apache.commons.lang3.import.version.range>[3.4,4)</apache.commons.lang3.import.version.range>
         <google.code.gson.import.version.range>[2.8,3.0)</google.code.gson.import.version.range>
-        <javax.ws.rs-api.version>2.0</javax.ws.rs-api.version>
+        <javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
         <javax.ws.rs-api.import.version>2.0</javax.ws.rs-api.import.version>
 
         <snakeyaml.version>1.19</snakeyaml.version>
