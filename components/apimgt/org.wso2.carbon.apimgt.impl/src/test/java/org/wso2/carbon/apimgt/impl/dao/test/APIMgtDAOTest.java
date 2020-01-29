@@ -1453,7 +1453,7 @@ public class APIMgtDAOTest {
         uriTemplate.setMediationScript("abcd defgh fff");
         if (scope!= null){
             Scope scope1 = new Scope();
-            scope1.setId(0);
+            scope1.setId("0");
             scope1.setDescription("");
             scope1.setKey(scope);
             scope1.setName(scope);
@@ -1464,7 +1464,7 @@ public class APIMgtDAOTest {
     }
     private Set<Scope> getScopes(){
         Scope scope1 = new Scope();
-        scope1.setId(1);
+        scope1.setId("1");
         scope1.setDescription("");
         scope1.setKey("read");
         scope1.setName("read");
