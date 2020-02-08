@@ -8745,7 +8745,7 @@ definitions:
             type: string
             description: |
               Type of binding role / permission
-            example: 'ROLE'
+            example: 'DEFAULT'
           values:
             type: array
             items:
