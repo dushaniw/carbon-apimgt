@@ -3431,7 +3431,7 @@ public final class APIUtil {
             api.setLatest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
             ArrayList<URITemplate> urlPatternsList;
 
-            Map<String, Scope> scopeToKeyMapping = ApiMgtDAO.getInstance().getAPIScopes(api.getId(), tenantDomainName);
+            Map<String, Scope> scopeToKeyMapping = ApiMgtDAO.getInstance().getAPIScopes(oldId, tenantDomainName);
             api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
             urlPatternsList = ApiMgtDAO.getInstance().getAllURITemplates(oldContext, oldId.getVersion());
@@ -3442,7 +3442,7 @@ public final class APIUtil {
                 uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
                 Scope templateScope = uriTemplate.getScope();
                 if (templateScope != null) {
-                    scopeToKeyMapping.get(templateScope.getKey());
+                    uriTemplate.setScope(scopeToKeyMapping.get(templateScope.getKey()));
                 }
             }
             api.setUriTemplates(uriTemplates);
