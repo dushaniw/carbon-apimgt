@@ -9184,6 +9184,7 @@ public class ApiMgtDAO {
         return storesSet;
     }
 
+    //TODO:remove
     public void addScopes(Set<?> objects, APIIdentifier apiIdentifier, int apiID, int tenantID)
             throws APIManagementException {
         Connection conn = null;
@@ -9692,6 +9693,7 @@ public class ApiMgtDAO {
 
     /**
      * update URI templates define for an API
+     * TODO: remove
      *
      * @param api
      * @throws APIManagementException
@@ -9934,6 +9936,7 @@ public class ApiMgtDAO {
 
     /**
      * Remove scope entries from DB, when delete APIs
+     * //TODO: remove
      *
      * @param apiIdentifier The {@link APIIdentifier} of the API
      */
@@ -10185,7 +10188,7 @@ public class ApiMgtDAO {
             statement.setInt(2, tenantId);
             statement.setInt(3, tenantId);
             try (ResultSet rs = statement.executeQuery()) {
-                if (rs != null && rs.next()) {
+                if (rs.next()) {
                     String provider = rs.getString("API_PROVIDER");
                     String apiName = rs.getString("API_NAME");
                     // Check if the provider name and api name is same.
@@ -10215,7 +10218,7 @@ public class ApiMgtDAO {
             statement.setString(1, scopeKey);
             statement.setInt(2, tenantId);
             try (ResultSet rs = statement.executeQuery()) {
-                if (rs != null && rs.next()) {
+                if (rs.next()) {
                     return true;
                 }
             }
@@ -15381,7 +15384,7 @@ public class ApiMgtDAO {
             statement.setInt(1, tenantId);
             statement.setString(2, scopeName);
             try (ResultSet rs = statement.executeQuery()) {
-                if (rs != null && rs.next()) {
+                if (rs.next()) {
                     isExist = true;
                 }
             }
