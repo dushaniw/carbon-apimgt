@@ -2892,7 +2892,13 @@ public class PublisherCommonUtils {
                             apiDtoTypeWrapper.getVersion()));
         }
 
-        if (apiProvider.isApiNameWithDifferentCaseExist(apiDtoTypeWrapper.getName(), organization)) {
+        // Block only when this create would INTRODUCE a new case-variant. If an exact-case
+        // name already exists in the tenant, the request is either a duplicate (caught later
+        // by the (provider,name,version,org) unique constraint) or a legitimate new-version
+        // path -- either way, the existing case-variant sibling (if any) is a pre-existing
+        // legacy state that predates this check, so blocking here would be over-strict.
+        if (apiProvider.isApiNameWithDifferentCaseExist(apiDtoTypeWrapper.getName(), organization)
+                && !apiProvider.isApiNameExistExactCase(apiDtoTypeWrapper.getName(), organization)) {
             throw new APIManagementException(
                     "API with name " + apiDtoTypeWrapper.getName() + " already exists.",
                     ExceptionCodes.from(ExceptionCodes.API_NAME_ALREADY_EXISTS, apiDtoTypeWrapper.getName()));

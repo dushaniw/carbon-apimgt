@@ -182,6 +182,19 @@ public interface APIManager {
     boolean isApiNameWithDifferentCaseExist(String apiName, String organization) throws APIManagementException;
 
     /**
+     * Checks whether an API with the given name in the exact same letter case is already registered under
+     * the given organization. Complements {@link #isApiNameWithDifferentCaseExist(String, String)}: this
+     * returns true only when the stored name matches character-for-character (no case fold), so callers
+     * can distinguish "introducing a new case-variant" from "acting on an already-registered exact name".
+     *
+     * @param apiName      A String representing an API name
+     * @param organization Organization
+     * @return true if an exact-case match already exists, false otherwise
+     * @throws APIManagementException if failed to check the exact-case api name availability
+     */
+    boolean isApiNameExistExactCase(String apiName, String organization) throws APIManagementException;
+
+    /**
      * Returns a set of API versions for the given provider and API name
      *
      * @param providerName name of the provider (common)
